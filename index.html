@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>首爾調頻｜12/16–20</title>
+
+    <meta name="apple-mobile-web-app-title" content="首爾調頻｜12/16–20">
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#4A5D45">
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'forest-bg': '#F2F4F1',
+                        'forest-light': '#DCE3D8',
+                        'forest-main': '#8FA887',
+                        'forest-deep': '#4A5D45',
+                        'forest-dark': '#2C3E2D',
+                        'earth': '#8C7B6C',
+                        'alert': '#D97777',
+                        'two': '#FDBA74',   /* Two (Tu) Orange */
+                        'sia': '#93C5FD'    /* Sia Blue */
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    boxShadow: {
+                        'card': '0 8px 30px -8px rgba(74, 93, 69, 0.15)',
+                        'soft': '0 4px 20px rgba(0,0,0,0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* iOS 優化 */
+        html { background-color: #2C3E2D; } 
+        body { background-color: #E0E5DF; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .bg-image-transition { transition: opacity 0.6s ease-in-out; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #DCE3D8; border-radius: 4px; }
+        
+        /* 動畫 */
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; }
+        .slide-up-enter-active { transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+        .slide-up-enter-from { transform: translateY(30px); opacity: 0; }
+    </style>
+</head>
+<body class="text-forest-dark antialiased h-screen overflow-hidden flex justify-center bg-[#D6DBD5]">
+
+    <div id="app" class="w-full max-w-md h-full bg-forest-bg flex flex-col shadow-2xl relative overflow-hidden font-sans">
+        
+        <header class="relative transition-all duration-700 bg-forest-deep shrink-0 overflow-hidden h-48 shadow-lg z-20">
+            <div class="absolute inset-0 w-full h-full bg-image-transition" 
+                 :class="(currentTab === 'home' || currentTab === 'money') ? 'opacity-100' : 'opacity-0'">
+                <img src="https://i.gyazo.com/16c50f7862a7b3fe3e072b5f46faf9b6.jpg" class="w-full h-full object-cover filter brightness-[0.75]">
+            </div>
+            <div class="absolute inset-0 w-full h-full bg-image-transition"
+                 :class="(currentTab === 'stay' || currentTab === 'ticket' || currentTab === 'guide') ? 'opacity-100' : 'opacity-0'">
+                 <img src="https://i.gyazo.com/b83db0f8c8c85656e4cfcf6fce75087c.jpg" class="w-full h-full object-cover filter brightness-[0.65] blur-[0.5px] scale-105">
+            </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-forest-dark/70 via-transparent to-transparent"></div>
+
+            <div class="absolute bottom-0 left-0 w-full p-6 flex flex-col justify-end h-full z-10 pointer-events-none">
+                <div class="flex justify-between items-end w-full">
+                    <div class="pointer-events-auto text-white drop-shadow-md">
+                        <p class="text-[10px] tracking-[0.25em] font-medium mb-1 uppercase opacity-90 text-forest-light">{{ headerSubtitle }}</p>
+                        <h1 class="text-3xl font-serif italic font-medium leading-none">{{ headerTitle }}</h1>
+                    </div>
+                    <button v-if="currentTab === 'home'" @click="showMap = !showMap" 
+                            class="pointer-events-auto w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center text-white shadow-lg active:scale-95 transition">
+                        <i class="fas" :class="showMap ? 'fa-list' : 'fa-map'"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto hide-scrollbar pb-28 px-4 pt-4 scroll-smooth bg-forest-bg relative z-10">
+            
+            <div v-if="currentTab === 'home'">
+                <div v-if="showMap" class="h-full rounded-[2rem] overflow-hidden border border-white shadow-inner relative min-h-[550px] animate-fade-in flex flex-col bg-white">
+                     <div class="h-1/2 w-full relative bg-gray-200 overflow-hidden">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Mangwon-dong.jpg/800px-Mangwon-dong.jpg" class="w-full h-full object-cover opacity-80">
+                        <div class="absolute inset-0 bg-black/10"></div>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 px-4 py-2 rounded-full text-xs font-bold text-forest-deep shadow-lg">
+                            <i class="fas fa-map-marked-alt mr-1"></i>望遠洞區域
+                        </div>
+                     </div>
+
+                     <div class="h-1/2 bg-white overflow-y-auto p-4 custom-scrollbar">
+                        <div class="flex justify-between items-center sticky top-0 bg-white pb-3 border-b border-gray-100 z-10 mb-4 pt-1">
+                            <h3 class="text-sm font-bold text-forest-deep uppercase tracking-wide">周邊設施導覽</h3>
+                            <button @click="openMapModal(null, null)" class="text-[10px] bg-forest-bg text-forest-deep px-3 py-1.5 rounded-full hover:bg-forest-light transition font-bold">
+                                <i class="fas fa-plus mr-1"></i>新增
+                            </button>
+                        </div>
+                        <div v-for="(category, catIdx) in mapFacilities" :key="catIdx" class="mb-6">
+                            <h4 class="text-xs font-bold text-gray-400 mb-2.5 flex items-center"><i :class="category.icon" class="mr-1.5"></i>{{ category.type }}</h4>
+                            <div class="space-y-3">
+                                <div v-for="(spot, spotIdx) in category.spots" :key="spotIdx" class="bg-forest-bg/50 p-3.5 rounded-xl border border-transparent hover:border-forest-light transition group relative">
+                                    <div class="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                                        <button @click="editMapSpot(catIdx, spotIdx)" class="text-gray-400 hover:text-forest-main"><i class="fas fa-pen text-xs"></i></button>
+                                        <button @click="deleteMapSpot(catIdx, spotIdx)" class="text-gray-400 hover:text-alert"><i class="fas fa-trash text-xs"></i></button>
+                                    </div>
+                                    <div class="flex justify-between items-start pr-12">
+                                        <div><p class="text-sm font-bold text-gray-800">{{ spot.name }}</p><p class="text-[10px] text-gray-500 mt-0.5"><i class="fas fa-walking mr-1"></i>{{ spot.distance }}</p></div>
+                                        <a v-if="spot.link" :href="spot.link" target="_blank" class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-green-600 shadow-sm hover:bg-green-500 hover:text-white transition"><i class="fas fa-map text-xs"></i></a>
+                                        <a v-else :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(spot.name + ' Mangwon Seoul')" target="_blank" class="w-8 h-8 rounded-full bg-white flex items-center justify-center text-forest-main shadow-sm hover:bg-forest-deep hover:text-white transition"><i class="fas fa-search-location text-xs"></i></a>
+                                    </div>
+                                    <p class="text-[10px] text-gray-600 mt-2 leading-relaxed border-t border-gray-200/50 pt-2">{{ spot.desc }}</p>
+                                </div>
+                            </div>
+                        </div>
+                     </div>
+                </div>
+
+                <div v-else class="space-y-5 animate-slide-up">
+                    <div class="flex overflow-x-auto hide-scrollbar space-x-3 pb-2 -mx-1 px-1">
+                        <div v-for="(day, index) in days" :key="index" @click="selectedDayIndex = index"
+                             class="flex-shrink-0 flex flex-col items-center justify-center w-14 h-20 rounded-full transition-all duration-300 border cursor-pointer"
+                             :class="selectedDayIndex === index ? 'bg-forest-deep text-white shadow-card border-transparent scale-105' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'">
+                            <span class="text-[10px] font-medium mt-1">{{ day.week }}</span>
+                            <span class="text-xl font-serif italic">{{ day.date.split('/')[1] }}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-blue-50 to-white border border-blue-100 p-4 rounded-2xl flex items-center justify-between shadow-sm animate-fade-in relative overflow-hidden">
+                        <div class="flex items-center gap-3 relative z-10">
+                            <div class="text-3xl text-blue-400 drop-shadow-sm"><i :class="selectedDayData.weather.icon"></i></div>
+                            <div><p class="text-xs font-bold text-gray-400 uppercase">Seoul Weather</p><p class="text-sm font-bold text-gray-700">{{ selectedDayData.weather.temp }} | {{ selectedDayData.weather.desc }}</p></div>
+                        </div>
+                        <div class="text-[10px] text-blue-300 bg-white/50 px-2 py-0.5 rounded-full">已更新</div>
+                    </div>
+
+                    <div v-if="selectedDayIndex === 1" class="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex items-start gap-3 shadow-sm animate-fade-in">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center shrink-0"><i class="fas fa-taxi"></i></div>
+                        <div><p class="text-sm font-bold text-blue-800">Day 2 交通預算</p><p class="text-xs text-blue-600 mt-1 leading-relaxed">全搭計程車預估：<span class="font-bold font-mono text-lg">₩60,000 - 70,000</span> (約 TWD 1,400 - 1,700)</p></div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <transition-group name="slide-up">
+                            <div v-for="(item, idx) in selectedDayData.itinerary" :key="item.time + idx" 
+                                 class="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-forest-light relative group hover:border-forest-main transition-colors">
+                                <button @click="deleteItem(idx)" class="absolute top-3 right-3 text-gray-200 hover:text-alert transition w-6 h-6 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                                <div class="flex gap-4">
+                                    <div class="flex flex-col items-center pt-1 w-12 flex-shrink-0">
+                                        <span class="text-sm font-bold text-forest-deep font-serif">{{ item.time }}</span>
+                                        <div class="h-full w-[1px] bg-gray-100 my-2 rounded-full"></div>
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex justify-between items-start">
+                                            <h3 class="font-bold text-gray-800 text-lg">{{ item.title }}</h3>
+                                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ml-2 whitespace-nowrap"
+                                                  :class="item.who === 'two' ? 'bg-two text-white' : (item.who === 'sia' ? 'bg-sia text-white' : 'bg-gray-200 text-gray-500')">
+                                                {{ item.who === 'two' ? '禿' : (item.who === 'sia' ? '夏' : '公') }}
+                                            </span>
+                                        </div>
+                                        <div class="flex flex-wrap items-center gap-2 mt-2">
+                                            <span class="text-[10px] text-gray-500 bg-gray-50 px-2 py-1 rounded flex items-center border border-gray-100"><i class="fas fa-map-pin mr-1 text-forest-main"></i> {{ item.location }}</span>
+                                            <a v-if="item.naverLink" :href="item.naverLink" target="_blank" class="text-[10px] text-green-600 bg-green-50 px-2 py-1 rounded border border-green-100 hover:bg-green-100 flex items-center transition"><i class="fas fa-map mr-1"></i>Naver Map</a>
+                                        </div>
+                                        <p v-if="item.note" class="mt-3 text-xs text-gray-600 bg-forest-bg/50 p-3 rounded-xl leading-relaxed whitespace-pre-wrap">{{ item.note }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </transition-group>
+                        <button @click="openAddModal" class="w-full py-4 rounded-2xl border-2 border-dashed border-gray-300 text-gray-400 font-bold text-sm hover:border-forest-main hover:text-forest-main hover:bg-forest-bg/30 transition duration-300"><i class="fas fa-plus mr-1"></i> 新增行程</button>
+                    </div>
+
+                    <div class="pt-8 pb-4">
+                        <div class="flex items-center gap-2 mb-4 px-1 justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-1 h-4 bg-gray-300 rounded-full"></div>
+                                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Soul Places (Backup)</h2>
+                            </div>
+                        </div>
+                        <div class="flex overflow-x-auto hide-scrollbar space-x-4 pb-4 items-start">
+                            <button @click="openBackupModal" class="flex-shrink-0 w-20 h-44 rounded-[40px] border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-forest-main hover:text-forest-main transition">
+                                <i class="fas fa-plus text-xl mb-1"></i>
+                                <span class="text-[10px] font-bold">Add</span>
+                            </button>
+                            <div v-for="(spot, idx) in backupSpots" :key="idx" class="flex-shrink-0 w-32 group relative text-center">
+                                <button @click="deleteBackupSpot(idx)" class="absolute top-1 right-1 z-10 w-6 h-6 bg-white/80 rounded-full text-alert flex items-center justify-center opacity-0 group-hover:opacity-100 transition shadow-sm"><i class="fas fa-times text-xs"></i></button>
+                                <a :href="spot.link" target="_blank" class="block">
+                                    <div class="w-32 h-44 rounded-[50px] overflow-hidden mb-3 relative shadow-md bg-gray-200 border-2 border-white">
+                                        <img :src="spot.img" class="w-full h-full object-cover group-hover:scale-110 transition duration-1000">
+                                        <div class="absolute inset-0 bg-black/10 group-hover:bg-transparent transition"></div>
+                                    </div>
+                                    <h4 class="font-bold text-xs text-forest-deep leading-tight px-1">{{ spot.name }}</h4>
+                                    <p class="text-[10px] text-gray-400 mt-1">{{ spot.area }}</p>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentTab === 'ticket'" class="space-y-6 pt-2 animate-slide-up">
+                <div class="bg-white p-1.5 rounded-full shadow-sm flex border border-gray-100 relative">
+                    <button v-for="p in ['two', 'sia']" :key="p" @click="currentPassenger = p"
+                            class="flex-1 py-2.5 rounded-full text-xs font-bold transition-all duration-300 z-10"
+                            :class="currentPassenger === p ? 'text-white' : 'text-gray-400 hover:bg-gray-50'">
+                        {{ p === 'two' ? '禿 (陳怡君)' : '夏 (陳雨凡)' }}
+                    </button>
+                    <div class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-forest-deep rounded-full transition-all duration-300 shadow-md"
+                         :class="currentPassenger === 'two' ? 'left-1.5' : 'translate-x-full left-[-3px]'"></div>
+                </div>
+                <div class="bg-white rounded-[24px] overflow-hidden shadow-card border border-white relative group">
+                    <div class="bg-forest-deep px-6 py-4 flex justify-between items-center text-white">
+                        <span class="font-bold text-sm tracking-wider">T'way Air</span>
+                        <div class="flex gap-2"><span class="text-[10px] border border-white/30 px-2 py-0.5 rounded font-mono">ECO</span></div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-center text-center mb-8 relative">
+                            <div class="relative z-10"><div class="text-4xl font-serif italic text-forest-dark">RMQ</div><div class="text-xs text-gray-400 font-bold mt-1 tracking-widest">TAICHUNG</div></div>
+                            <div class="flex-1 px-4 flex flex-col items-center">
+                                <i class="fas fa-plane text-forest-main mb-2 transform rotate-12 text-xl"></i>
+                                <div class="w-full h-px bg-gray-200 relative"><div class="absolute w-1.5 h-1.5 bg-forest-light rounded-full left-0 -top-[3px]"></div><div class="absolute w-1.5 h-1.5 bg-forest-light rounded-full right-0 -top-[3px]"></div></div>
+                                <div class="text-[10px] text-gray-400 mt-2 font-mono bg-gray-50 px-2 py-0.5 rounded">TW670 / TW669</div>
+                            </div>
+                            <div class="relative z-10"><div class="text-4xl font-serif italic text-forest-dark">ICN</div><div class="text-xs text-gray-400 font-bold mt-1 tracking-widest">SEOUL</div></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 bg-forest-bg/50 p-5 rounded-2xl mb-6 border border-forest-light/30">
+                            <div><p class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Passenger</p><p class="text-xs font-bold text-gray-800">{{ passengerData[currentPassenger].name }}</p></div>
+                            <div><p class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Baggage</p><p class="text-xs font-bold text-forest-deep bg-white/80 px-2 py-0.5 rounded inline-block shadow-sm">{{ passengerData[currentPassenger].baggage }}</p></div>
+                            <div><p class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Seat (Outbound)</p><p class="text-xs font-bold text-gray-800">{{ passengerData[currentPassenger].seatOut }}</p></div>
+                            <div><p class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">PNR Code</p><p class="text-xs font-bold font-mono text-gray-800">{{ passengerData[currentPassenger].pnr }}</p></div>
+                        </div>
+                        <div v-if="currentPassenger === 'two'" class="animate-fade-in"><a :href="passengerData.two.link" target="_blank" class="block w-full py-3.5 bg-forest-main text-white text-center rounded-xl text-xs font-bold shadow-lg shadow-forest-main/30 hover:bg-forest-deep hover:shadow-xl transition transform active:scale-95"><i class="fas fa-file-pdf mr-2"></i>開啟電子機票 PDF</a></div>
+                        <div v-else class="grid grid-cols-2 gap-3 animate-fade-in">
+                            <a :href="passengerData.sia.linkOut" target="_blank" class="py-3.5 bg-forest-dark text-white text-center rounded-xl text-xs font-bold shadow-lg hover:bg-black transition transform active:scale-95"><i class="fas fa-plane-departure mr-2"></i>去程機票</a>
+                            <a :href="passengerData.sia.linkIn" target="_blank" class="py-3.5 bg-forest-main text-white text-center rounded-xl text-xs font-bold shadow-lg hover:bg-forest-deep transition transform active:scale-95"><i class="fas fa-plane-arrival mr-2"></i>回程機票</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentTab === 'stay'" class="space-y-6 pt-2 animate-slide-up">
+                <div class="relative rounded-[2rem] overflow-hidden shadow-card bg-white p-6 mt-16 border border-white">
+                    <div class="text-center mb-8">
+                        <span class="bg-forest-bg text-forest-deep px-3 py-1 rounded-full text-[10px] font-bold tracking-wider mb-2 inline-block">Mapo-gu, Seoul</span>
+                        <h2 class="text-2xl font-serif italic text-forest-dark mb-1">Soon Stay Mangwon</h2>
+                        <p class="text-xs text-gray-500">12-22, Mangwon-dong</p>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="flex gap-3">
+                            <button @click="copyAddress" class="flex-1 py-3 bg-forest-bg text-forest-deep rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-forest-light transition"><i class="fas fa-copy"></i> 複製地址</button>
+                            <a href="https://go-paul.notion.site/Soon-Stay-Mangwon-29738f098a158067be4bf38f142c3545" target="_blank" class="flex-1 py-3 bg-forest-deep text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-forest-deep/20 hover:bg-forest-dark transition"><i class="fas fa-external-link-alt"></i> Notion 指南</a>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-forest-deep border-b border-gray-100 pb-2 text-sm uppercase tracking-wider">機場 → 民宿 交通指引</h3>
+                            <div class="flex items-start gap-4 group">
+                                <div class="w-8 h-8 rounded-full bg-forest-deep text-white flex items-center justify-center font-serif italic shrink-0 shadow-md group-hover:scale-110 transition">1</div>
+                                <div><p class="font-bold text-sm text-gray-800">機場巴士 6002</p><p class="text-xs text-gray-500 mt-0.5 leading-relaxed">仁川機場 (T1/T2) 上車<br>→ <span class="text-forest-deep font-bold">Holt 兒童福祉會站</span> 下車 (₩17,000)</p></div>
+                            </div>
+                            <div class="flex items-start gap-4 group">
+                                <div class="w-8 h-8 rounded-full bg-forest-main text-white flex items-center justify-center font-serif italic shrink-0 shadow-md group-hover:scale-110 transition">2</div>
+                                <div><p class="font-bold text-sm text-gray-800">計程車 Taxi</p><p class="text-xs text-gray-500 mt-0.5">原地轉乘至民宿 (約 ₩6,000)</p></div>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <h3 class="font-bold text-forest-deep border-b border-gray-100 pb-2 text-sm uppercase tracking-wider">地鐵資訊 Subway</h3>
+                            <div class="flex items-start gap-4 group">
+                                <div class="w-8 h-8 rounded-full bg-orange-300 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-md">6</div>
+                                <div><p class="font-bold text-sm text-gray-800">望遠站 (Mangwon Stn)</p><p class="text-xs text-gray-500 mt-0.5 leading-relaxed">步行約 5-10 分鐘。<br>主要對外樞紐，直達弘大、合井、梨泰院。</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentTab === 'money'" class="space-y-6 pt-2 animate-slide-up">
+                <div class="bg-white p-5 rounded-3xl shadow-soft border border-gray-100">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Rate Cheat Sheet</span>
+                        <span class="text-[10px] font-mono bg-forest-bg px-2 py-1 rounded text-forest-deep font-bold">x0.023</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                        <div v-for="v in [1000, 5000, 10000, 50000]" class="bg-forest-bg/50 p-2 rounded-xl">
+                            <p class="text-[10px] text-gray-500 mb-1">₩{{ v/1000 }}k</p>
+                            <p class="text-xs font-bold text-forest-deep">${{ Math.round(v*0.023) }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-[30px] p-6 shadow-card min-h-[400px] flex flex-col relative overflow-hidden">
+                    <div class="mb-4 z-10">
+                        <div class="flex justify-between items-end mb-2">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-wider">Total Expenses</p>
+                            <h3 class="text-3xl font-serif italic text-forest-deep">NT$ {{ formatNumber(expenseStats.total) }}</h3>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <div class="bg-earth/10 p-2 rounded-xl text-center"><p class="text-[9px] text-gray-500 mb-0.5">公 Split</p><p class="text-xs font-bold text-earth">${{ formatNumber(expenseStats.split) }}</p></div>
+                            <div class="bg-two/10 p-2 rounded-xl text-center"><p class="text-[9px] text-gray-500 mb-0.5">禿 Two</p><p class="text-xs font-bold text-two">${{ formatNumber(expenseStats.two) }}</p></div>
+                            <div class="bg-sia/10 p-2 rounded-xl text-center"><p class="text-[9px] text-gray-500 mb-0.5">夏 Sia</p><p class="text-xs font-bold text-sia">${{ formatNumber(expenseStats.sia) }}</p></div>
+                        </div>
+                    </div>
+                    <div class="flex-1 space-y-3 overflow-y-auto max-h-[350px] pr-2 custom-scrollbar z-10 border-t border-gray-100 pt-3">
+                        <div v-for="(exp, i) in expenses" :key="i" class="flex justify-between items-center group bg-gray-50/80 p-3 rounded-2xl border border-transparent hover:border-gray-200 transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm shrink-0 transition transform group-hover:scale-110" 
+                                     :class="exp.who === 'split' ? 'bg-earth' : (exp.who === 'two' ? 'bg-two' : 'bg-sia')">
+                                    {{ exp.who === 'split' ? '公' : (exp.who === 'two' ? '禿' : '夏') }}
+                                </div>
+                                <div><p class="font-bold text-sm text-gray-700">{{ exp.item }}</p><p class="text-[10px] text-gray-400 flex items-center gap-2"><span>{{ exp.date }}</span></p></div>
+                            </div>
+                            <div class="text-right flex items-center gap-3">
+                                <div><p class="font-bold text-sm text-gray-800">{{ exp.isTwd ? 'NT$' : '₩' }}{{ formatNumber(exp.amount) }}</p><p v-if="!exp.isTwd" class="text-[10px] text-gray-400">≈ ${{ Math.round(exp.amount * 0.023) }}</p></div>
+                                <button @click="deleteExpense(i)" class="w-8 h-8 rounded-full bg-white text-gray-300 flex items-center justify-center hover:text-alert hover:bg-red-50 shadow-sm opacity-0 group-hover:opacity-100 transition duration-200"><i class="fas fa-trash-alt text-xs"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100 z-10">
+                        <div class="flex gap-2 mb-3">
+                            <input type="date" v-model="newExpenseDate" class="bg-gray-50 rounded-xl px-3 py-2 text-[10px] w-1/3 outline-none text-gray-500 focus:bg-white focus:ring-1 focus:ring-forest-light">
+                            <div class="flex bg-gray-50 rounded-xl p-1 flex-1">
+                                <button v-for="opt in [{v:'two',l:'Two'},{v:'sia',l:'Sia'},{v:'split',l:'公'}]" @click="newExpenseWho = opt.v" class="flex-1 rounded-lg text-xs font-bold transition-all" :class="newExpenseWho === opt.v ? 'bg-white shadow-sm text-forest-deep' : 'text-gray-400 hover:text-gray-600'">{{ opt.l }}</button>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <input v-model="newExpenseItem" type="text" placeholder="項目" class="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
+                            <input v-model="newExpensePrice" type="number" placeholder="金額" class="w-20 bg-gray-50 rounded-xl px-3 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
+                            <button @click="addExpense" class="bg-forest-main text-white rounded-xl px-4 shadow-lg active:scale-95 transition hover:bg-forest-deep"><i class="fas fa-plus"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentTab === 'guide'" class="space-y-6 pt-2 animate-slide-up">
+                
+                <div class="bg-white rounded-[24px] p-6 shadow-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-forest-deep text-lg">Packing List</h3>
+                        <div class="flex bg-forest-bg p-1 rounded-xl">
+                            <button @click="packingPerson = 'two'" class="px-4 py-1.5 text-xs rounded-lg transition-all duration-300" :class="packingPerson === 'two' ? 'bg-white shadow-sm text-forest-deep font-bold' : 'text-gray-400 hover:text-gray-600'">禿 (Two)</button>
+                            <button @click="packingPerson = 'sia'" class="px-4 py-1.5 text-xs rounded-lg transition-all duration-300" :class="packingPerson === 'sia' ? 'bg-white shadow-sm text-forest-deep font-bold' : 'text-gray-400 hover:text-gray-600'">夏 (Sia)</button>
+                        </div>
+                    </div>
+                    <div class="space-y-6 mb-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div v-for="(items, category) in groupedPackingList" :key="category">
+                            <h4 class="text-[10px] font-bold text-forest-main uppercase mb-2 border-b border-forest-light/30 pb-1">{{ category }}</h4>
+                            <div class="space-y-2">
+                                <div v-for="(item, idx) in items" :key="idx" class="flex items-start group p-1 hover:bg-gray-50 rounded-lg transition">
+                                    <label class="flex items-start gap-3 cursor-pointer flex-1 select-none">
+                                        <div class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 mt-0.5"
+                                             :class="item.checked ? 'bg-forest-deep border-forest-deep scale-110' : 'border-gray-300 bg-white'">
+                                            <i v-if="item.checked" class="fas fa-check text-white text-[10px]"></i>
+                                        </div>
+                                        <div class="flex-1">
+                                            <span class="text-sm transition-all duration-200 block" :class="item.checked ? 'text-gray-300 line-through' : 'text-gray-700'">{{ item.name }}</span>
+                                            <span v-if="item.note" class="text-[10px] text-orange-400 block mt-0.5">{{ item.note }}</span>
+                                        </div>
+                                        <input type="checkbox" v-model="item.checked" class="hidden">
+                                    </label>
+                                    <button @click="deletePackingItem(item)" class="text-gray-300 hover:text-alert px-2 opacity-0 group-hover:opacity-100 transition"><i class="fas fa-times"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 pt-3 border-t border-gray-100">
+                        <select v-model="newPackingCategory" class="bg-gray-50 rounded-xl px-2 py-2 text-[10px] outline-none w-20 text-gray-500">
+                            <option v-for="cat in packingCategories" :value="cat">{{ cat }}</option>
+                        </select>
+                        <input v-model="newPackingItem" type="text" placeholder="新增物品..." class="flex-1 bg-gray-50 rounded-xl px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-forest-light">
+                        <button @click="addPackingItem" class="text-white bg-forest-light hover:bg-forest-main w-8 h-8 rounded-full flex items-center justify-center transition shadow-sm"><i class="fas fa-plus text-xs"></i></button>
+                    </div>
+                </div>
+
+                <a href="https://www.ccesim.com/collections/KR?menu_id=37500" target="_blank" class="block bg-gray-800 rounded-2xl p-4 shadow-lg text-white flex justify-between items-center group overflow-hidden relative">
+                    <div class="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-white/10 to-transparent"></div>
+                    <div class="flex items-center gap-3 relative z-10">
+                        <div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm"><i class="fas fa-sim-card"></i></div>
+                        <div><p class="font-bold text-sm">購買韓國 eSim</p><p class="text-[10px] text-gray-400">CCESIM 網卡連結</p></div>
+                    </div>
+                    <i class="fas fa-external-link-alt opacity-50 group-hover:translate-x-1 transition relative z-10"></i>
+                </a>
+
+                <div class="grid grid-cols-1 gap-4 pb-6">
+                    <div class="bg-white p-5 rounded-2xl border border-red-100 shadow-sm">
+                        <h4 class="text-alert font-bold text-sm mb-4 uppercase flex items-center"><i class="fas fa-exclamation-circle mr-2"></i>緊急聯絡 Emergency</h4>
+                        <div class="grid grid-cols-2 gap-x-4 gap-y-3">
+                             <div v-for="contact in emergencyContacts" :key="contact.name" class="border-b border-gray-50 pb-2">
+                                 <span class="block text-[10px] text-gray-500 mb-0.5">{{ contact.name }}</span>
+                                 <b class="text-sm text-gray-800 tracking-wide block select-all">{{ contact.phone }}</b>
+                             </div>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="text-blue-600 font-bold text-sm uppercase flex items-center"><i class="fas fa-info-circle mr-2"></i>注意事項 Notes</h4>
+                            <button @click="openNoteModal" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-100 font-bold transition"><i class="fas fa-plus mr-1"></i>新增</button>
+                        </div>
+                        <ul class="space-y-4">
+                            <li v-for="(note, idx) in travelNotes" :key="idx" class="flex items-start gap-3 border-b border-blue-50/50 pb-3 last:border-0 group relative">
+                                <div class="w-7 h-7 rounded-full bg-blue-50 text-blue-400 flex items-center justify-center shrink-0 mt-0.5"><i :class="note.icon" class="text-xs"></i></div>
+                                <div class="flex-1">
+                                    <p class="text-xs font-bold text-gray-700 mb-1">{{ note.title }}</p>
+                                    <p class="text-[11px] text-gray-500 leading-relaxed text-justify whitespace-pre-wrap">{{ note.content }}</p>
+                                </div>
+                                <button @click="deleteNote(idx)" class="absolute top-0 right-0 text-gray-300 hover:text-alert opacity-0 group-hover:opacity-100 transition"><i class="fas fa-trash text-xs"></i></button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <nav class="absolute bottom-6 left-6 right-6 h-16 bg-white/85 backdrop-blur-xl rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.1)] flex justify-around items-center z-50 px-2 border border-white/50">
+            <button v-for="tab in tabs" :key="tab.id" @click="currentTab = tab.id"
+                    class="w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 relative group"
+                    :class="currentTab === tab.id ? 'bg-forest-deep text-white shadow-lg -translate-y-4' : 'text-gray-400 hover:text-forest-main'">
+                <i :class="tab.icon" class="text-lg"></i>
+                <span v-if="currentTab === tab.id" class="absolute -bottom-6 text-[9px] font-bold text-forest-deep whitespace-nowrap opacity-0 animate-fade-in" style="opacity:1">{{ tab.label }}</span>
+            </button>
+        </nav>
+
+        <div v-if="showModal" class="absolute inset-0 z-[60] bg-forest-dark/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+            <div class="bg-white w-full rounded-[30px] p-6 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
+                
+                <div v-if="modalMode === 'itinerary'">
+                    <h3 class="font-bold text-xl mb-6 text-forest-deep font-serif italic text-center">New Activity</h3>
+                    <input v-model="newItem.time" type="time" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition text-gray-600">
+                    <input v-model="newItem.title" type="text" placeholder="行程名稱" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition">
+                    <input v-model="newItem.location" type="text" placeholder="地點" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition">
+                    <div class="flex gap-2 mb-3">
+                        <button v-for="opt in [{v:'split',l:'公'},{v:'two',l:'Two'},{v:'sia',l:'Sia'}]" 
+                                @click="newItem.who = opt.v"
+                                class="flex-1 py-2 rounded-xl text-xs font-bold transition-all border"
+                                :class="newItem.who === opt.v ? (opt.v==='two'?'bg-two text-white border-two':(opt.v==='sia'?'bg-sia text-white border-sia':'bg-gray-400 text-white border-gray-400')) : 'bg-white border-gray-200 text-gray-400'">
+                            {{ opt.l }}
+                        </button>
+                    </div>
+                    <input v-model="newItem.naverLink" type="text" placeholder="Naver Map 連結 (選填)" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition text-xs">
+                    <textarea v-model="newItem.note" placeholder="備註 (Optional)" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition text-sm h-20"></textarea>
+                    
+                    <div class="flex gap-3 mt-4">
+                        <button @click="showModal = false" class="flex-1 py-3.5 rounded-2xl bg-gray-100 font-bold text-gray-500 hover:bg-gray-200 transition">取消</button>
+                        <button @click="saveNewItem" class="flex-1 py-3.5 rounded-2xl bg-forest-deep text-white font-bold shadow-lg shadow-forest-deep/30 hover:bg-forest-dark transition">儲存</button>
+                    </div>
+                </div>
+
+                <div v-if="modalMode === 'map'">
+                    <h3 class="font-bold text-xl mb-6 text-forest-deep font-serif italic text-center">New Map Spot</h3>
+                    <div class="mb-3">
+                         <label class="text-xs text-gray-400 mb-1 block pl-2">類別 Category</label>
+                         <select v-model="newMapItem.categoryIndex" class="w-full bg-gray-50 p-4 rounded-2xl outline-none border border-transparent focus:border-forest-light text-sm">
+                             <option v-for="(cat, idx) in mapFacilities" :value="idx">{{ cat.type }}</option>
+                         </select>
+                    </div>
+                    <input v-model="newMapItem.name" type="text" placeholder="地點名稱" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition">
+                    <input v-model="newMapItem.distance" type="text" placeholder="距離 (e.g. 步行5分)" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition">
+                    <input v-model="newMapItem.desc" type="text" placeholder="說明簡介" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition">
+                    <input v-model="newMapItem.link" type="text" placeholder="Naver/Kakao Map Link" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition text-xs">
+                    <div class="flex gap-3 mt-4">
+                        <button @click="showModal = false" class="flex-1 py-3.5 rounded-2xl bg-gray-100 font-bold text-gray-500 hover:bg-gray-200 transition">取消</button>
+                        <button @click="saveMapSpot" class="flex-1 py-3.5 rounded-2xl bg-forest-deep text-white font-bold shadow-lg shadow-forest-deep/30 hover:bg-forest-dark transition">儲存</button>
+                    </div>
+                </div>
+
+                <div v-if="modalMode === 'backup'">
+                    <h3 class="font-bold text-xl mb-6 text-forest-deep font-serif italic text-center">New Soul Place</h3>
+                    <input v-model="newBackupItem.name" type="text" placeholder="景點名稱" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition">
+                    <input v-model="newBackupItem.area" type="text" placeholder="地區 (e.g. 弘大)" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition">
+                    <input v-model="newBackupItem.img" type="text" placeholder="圖片網址 URL" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition text-xs">
+                    <input v-model="newBackupItem.link" type="text" placeholder="介紹連結 URL" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition text-xs">
+                    <div class="flex gap-3 mt-4">
+                        <button @click="showModal = false" class="flex-1 py-3.5 rounded-2xl bg-gray-100 font-bold text-gray-500 hover:bg-gray-200 transition">取消</button>
+                        <button @click="saveBackupItem" class="flex-1 py-3.5 rounded-2xl bg-forest-deep text-white font-bold shadow-lg shadow-forest-deep/30 hover:bg-forest-dark transition">儲存</button>
+                    </div>
+                </div>
+
+                <div v-if="modalMode === 'note'">
+                    <h3 class="font-bold text-xl mb-6 text-forest-deep font-serif italic text-center">New Note</h3>
+                    <div class="mb-3 flex justify-center gap-4 text-2xl text-gray-400">
+                        <i v-for="icon in ['fas fa-info-circle', 'fas fa-exclamation-triangle', 'fas fa-bolt', 'fas fa-clock', 'fas fa-map-marker-alt', 'fas fa-bus', 'fas fa-utensils']" 
+                           :key="icon" :class="[icon, newNote.icon === icon ? 'text-blue-500 scale-125' : '']" 
+                           @click="newNote.icon = icon" class="cursor-pointer transition"></i>
+                    </div>
+                    <input v-model="newNote.title" type="text" placeholder="標題 (e.g. 換錢)" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition">
+                    <textarea v-model="newNote.content" placeholder="內容說明" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light transition text-sm h-24"></textarea>
+                    <div class="flex gap-3 mt-4">
+                        <button @click="showModal = false" class="flex-1 py-3.5 rounded-2xl bg-gray-100 font-bold text-gray-500 hover:bg-gray-200 transition">取消</button>
+                        <button @click="saveNote" class="flex-1 py-3.5 rounded-2xl bg-forest-deep text-white font-bold shadow-lg shadow-forest-deep/30 hover:bg-forest-dark transition">儲存</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const { createApp, ref, computed, reactive } = Vue;
+
+        createApp({
+            setup() {
+                const currentTab = ref('home');
+                const showMap = ref(false);
+                const selectedDayIndex = ref(0);
+                const currentPassenger = ref('two'); 
+                const showModal = ref(false);
+                const modalMode = ref('itinerary'); 
+                const packingPerson = ref('two'); 
+                const editingMapItem = ref(null); 
+
+                // Header Logic
+                const headerTitle = computed(() => ({ home: 'Seoul Trip', ticket: 'Flight Ticket', stay: 'Accommodation', money: 'Trip Wallet', guide: 'Travel Guide' }[currentTab.value]));
+                const headerSubtitle = computed(() => ({ home: 'Dec 16 - Dec 20', ticket: 'E-Ticket Info', stay: 'Soon Stay Mangwon', money: 'Shared Expenses', guide: 'Checklist & Tips' }[currentTab.value]));
+                
+                const tabs = [
+                    { id: 'home', icon: 'fas fa-tree', label: '行程' },
+                    { id: 'ticket', icon: 'fas fa-plane', label: '機票' },
+                    { id: 'stay', icon: 'fas fa-bed', label: '住宿' },
+                    { id: 'money', icon: 'fas fa-wallet', label: '記帳' },
+                    { id: 'guide', icon: 'fas fa-suitcase', label: '指南' }
+                ];
+
+                const days = [
+                    { date: '12/16', week: 'TUE' }, { date: '12/17', week: 'WED' },
+                    { date: '12/18', week: 'THU' }, { date: '12/19', week: 'FRI' },
+                    { date: '12/20', week: 'SAT' }
+                ];
+
+                // Data
+                const itineraryData = reactive({
+                    0: { 
+                        weather: { temp: '-1°C', icon: 'fas fa-cloud', desc: '多雲 Dry' },
+                        itinerary: [
+                            { time: '17:40', title: '飛往首爾', location: 'RMQ Airport', note: '提早 2.5 小時抵達機場', naverLink: '', who: 'split' },
+                            { time: '22:30', title: '前往民宿', location: 'Soon Stay', note: '機場巴士 6002 -> Holt 站 -> Taxi', naverLink: '', who: 'split' }
+                        ]
+                    },
+                    1: { 
+                        weather: { temp: '-5°C', icon: 'fas fa-snowflake', desc: '寒冷/偶雪 Snow' },
+                        itinerary: [
+                            { time: '10:00', title: 'Coex Mall', location: '江南區', note: '寄放頌缽於置物櫃', naverLink: '', who: 'split' },
+                            { time: '19:00', title: '頌缽活動', location: '延禧洞', note: '正式活動，請勿遲到', naverLink: '', who: 'split' }
+                        ]
+                    },
+                    2: { 
+                        weather: { temp: '-4°C', icon: 'fas fa-sun', desc: '晴朗 Sunny' },
+                        itinerary: [{ time: '10:00', title: '居家頌缽', location: 'Soon Stay', note: 'Morning Session', naverLink: '', who: 'split' }]
+                    },
+                    3: { 
+                        weather: { temp: '-2°C', icon: 'fas fa-cloud-sun', desc: '多雲時晴' },
+                        itinerary: [{ time: '10:00', title: '備用：文學館', location: '鍾路區', note: '尹東柱文學館', naverLink: '', who: 'split' }]
+                    },
+                    4: { 
+                        weather: { temp: '0°C', icon: 'fas fa-plane-departure', desc: '返程 Departure' },
+                        itinerary: [{ time: '14:25', title: '返程飛機', location: 'ICN Airport', note: 'TW 669', naverLink: '', who: 'split' }]
+                    }
+                });
+
+                const backupSpots = reactive([
+                    { name: '望理團路', link: 'https://creatrip.com/zh-TW/blog/7530', img: 'https://i.gyazo.com/6d6eaf8c2dacf96b3da68bdb2eef55ec.jpg', area: '望遠洞' },
+                    { name: '戰爭與女性人權博物館', link: 'https://share.google/MU8rboHnFsGB34OLu', img: 'https://i.gyazo.com/88ed745ff2de070ff582127b743ef34c.jpg', area: '麻浦區' },
+                    { name: 'Literary Museum of Poet Yun Dong-ju', link: 'https://share.google/MF9ILWVC9tpDFoGqO', img: 'https://i.gyazo.com/e0886097fa7bdef2723d13191d11bb5a.jpg', area: '鍾路區' }
+                ]);
+
+                const mapFacilities = reactive([
+                      {
+                        type: '交通樞紐 Transport', icon: 'fas fa-subway',
+                        spots: [
+                            { name: '望遠站 (Mangwon Stn)', distance: '步行 5-10分', desc: '地鐵6號線，主要對外樞紐。可直達弘大、合井、梨泰院。', link: '' },
+                            { name: '公車站牌', distance: '步行 3-5分', desc: '多條綠色支線公車前往弘大、延禧洞、新村。', link: '' },
+                            { name: '計程車 (Kakao T)', distance: '隨叫隨到', desc: '建議使用 Kakao T 或 Naver Map 叫車，望遠區車輛多。', link: '' }
+                        ]
+                      },
+                      {
+                        type: '生活機能 Life', icon: 'fas fa-shopping-basket',
+                        spots: [
+                            { name: '望遠市場', distance: '步行 5-10分', desc: '首爾知名在地市場。必吃：炸雞塊、辣炒年糕、可樂餅。', link: '' },
+                            { name: '便利商店 (GS25/CU)', distance: '步行 1-3分', desc: '隨處可見，可儲值 T-Money 與購買宵夜。', link: '' },
+                            { name: 'Homeplus (合井店)', distance: '地鐵一站', desc: '大型超市，適合採購零食伴手禮 (位於合井站)。', link: '' },
+                            { name: '藥局 (Pharmacy)', distance: '步行 5-10分', desc: '集中於地鐵出口周邊，方便購買常備藥。', link: '' }
+                        ]
+                      },
+                      {
+                          type: '休閒娛樂 Leisure', icon: 'fas fa-coffee',
+                          spots: [
+                              { name: '望理團路', distance: '步行 5-15分', desc: '充滿設計師咖啡廳、獨立書店與風格小店的文青街區。', link: '' },
+                              { name: '望遠漢江公園', distance: '步行 15-20分', desc: '適合散步、看夕陽、騎腳踏車。', link: '' },
+                              { name: '戰爭與女性人權博物館', distance: '短程計程車', desc: '深度人文景點。', link: '' }
+                          ]
+                      }
+                ]);
+
+                const passengerData = {
+                    two: { name: 'MS CHEN/YI CHUN (禿 Two)', pnr: 'D5XG3G', seatOut: '28F', baggage: '20KG (15+5)', link: 'https://drive.google.com/file/d/1kdUk2LDfbx4Bh8FDfyJqrWAAPdnSoqVt/view?usp=sharing' },
+                    sia: { name: 'Yu Fan Chen (夏 Sia)', pnr: 'D8A4YY', seatOut: '--', baggage: '15KG', linkOut: 'https://drive.google.com/file/d/1e48Nk3taZQ_4O0u_a__38-fFObRsV5As/view?usp=sharing', linkIn: 'https://drive.google.com/file/d/1N-zB6sZ-qdndLmcFZTeHk2pA_rWz4Cm7/view?usp=sharing' }
+                };
+                const expenses = reactive([ { item: '機票 & 住宿分攤', amount: 10852.23, who: 'split', date: '預付', isTwd: true }, { item: '機場巴士', amount: 18000, who: 'two', date: '12/16', isTwd: false } ]);
+                
+                const basePackingList = [
+                    { category: '文件', name: '護照', note: '有效期至少 6 個月', checked: false },
+                    { category: '文件', name: '身份證', note: '備用', checked: false },
+                    { category: '文件', name: '電子登機證', note: '去程 TW670 / 回程 TW669', checked: false },
+                    { category: '文件', name: 'eSIM / 網卡憑證', note: '', checked: false },
+                    { category: '文件', name: '旅遊保險單', note: '', checked: false },
+                    { category: '卡片/錢', name: '信用卡', note: '海外回饋高者佳', checked: false },
+                    { category: '卡片/錢', name: '韓元現金', note: '充值 T-money 用', checked: false },
+                    { category: '卡片/錢', name: 'WOWPASS / Namane', note: '主要消費與交通', checked: false },
+                    { category: '卡片/錢', name: '旅伴 T-money', note: '給旅伴使用', checked: false },
+                    { category: '電子', name: '電源轉接頭', note: '220V 圓形雙孔', checked: false },
+                    { category: '電子', name: '充電器/線', note: '', checked: false },
+                    { category: '電子', name: '行動電源', note: '★ 務必放手提登機行李', checked: false },
+                    { category: '衣著', name: '保暖衣物', note: '洋蔥式穿法，室內有暖氣', checked: false },
+                    { category: '衣著', name: '外套/大衣', note: '防風保暖', checked: false },
+                    { category: '衣著', name: '內衣褲/襪子', note: '足夠天數', checked: false },
+                    { category: '衣著', name: '拖鞋', note: '民宿室內用', checked: false },
+                    { category: '衛生/保養', name: '牙刷/牙膏', note: '★ 環保規定不主動提供', checked: false },
+                    { category: '衛生/保養', name: '洗臉/卸妝', note: '', checked: false },
+                    { category: '衛生/保養', name: '洗護髮/沐浴', note: '分裝瓶', checked: false },
+                    { category: '衛生/保養', name: '化妝包/保養品', note: '加強保濕', checked: false },
+                    { category: '特殊/其他', name: '雨傘', note: '備用', checked: false },
+                    { category: '特殊/其他', name: '個人常備藥', note: '感冒/腸胃/止痛', checked: false },
+                    { category: '特殊/其他', name: '輕便包/袋', note: '參訪奉恩寺用', checked: false },
+                    { category: '特殊/其他', name: '頌缽 & 配件', note: 'Day 2 需寄物，注意保護', checked: false }
+                ];
+
+                const packingLists = reactive({
+                    two: JSON.parse(JSON.stringify(basePackingList)),
+                    sia: JSON.parse(JSON.stringify(basePackingList))
+                });
+                
+                const packingCategories = ['文件', '卡片/錢', '電子', '衣著', '衛生/保養', '特殊/其他'];
+                const emergencyContacts = [ { name: '警察局 (Police)', phone: '112' }, { name: '火警/救護 (Fire/Ambulance)', phone: '119' }, { name: '緊急醫療資訊中心', phone: '1339' }, { name: '韓國旅遊諮詢熱線 (中/英)', phone: '1330' }, { name: '駐韓國台北代表部 (急難救助)', phone: '+82-10-8138-0411' }, { name: '駐韓國台北代表部 (一般)', phone: '+82-2-6329-6000' }, { name: '信用卡掛失 (Visa Global)', phone: '001-800-4481-2500' } ];
+                
+                const travelNotes = reactive([
+                    { title: 'T-money 充值 (Day 1)', content: '下飛機後首要任務！WOWPASS/Namane 或旅伴 T-money 皆需在機場便利商店用「韓元現金」充值交通餘額。', icon: 'fas fa-money-bill-wave' },
+                    { title: '機場首選交通', content: '優先搭乘 6002 號機場巴士 (₩18,200)。Holt 站下車轉計程車直達民宿，免去地鐵搬運頌缽之苦。', icon: 'fas fa-bus' },
+                    { title: '末班車風險', content: '航班 21:10 抵達，請留意巴士末班車。若錯過，請立即改搭計程車 (約 ₩45,000~60,000)。', icon: 'fas fa-exclamation-triangle' },
+                    { title: '望遠區內移動', content: '民宿到望遠站可搭「麻浦社區公車」(約10分 ₩1,200) 或步行 5-10 分鐘。', icon: 'fas fa-walking' },
+                    { title: '行李重量規定', content: 'Two (禿): 託運 20kg (已加購) / 手提 10kg。Sia (夏): 託運 15kg / 手提 10kg。', icon: 'fas fa-suitcase' },
+                    { title: '行動電源規定', content: '務必將行動電源放入「手提登機行李」(10kg內)，嚴禁託運！', icon: 'fas fa-battery-full' },
+                    { title: '旅伴卡片使用', content: '旅伴使用 Namane/T-money 時，請僅用「韓元現金」充值交通餘額，避免混淆預付卡餘額。', icon: 'fas fa-credit-card' },
+                    { title: '電壓與插座', content: '韓國電壓為 220V，插座為「兩孔圓形」(豬鼻子)。台灣電器若無變壓功能需自備變壓器，且務必攜帶轉接頭。', icon: 'fas fa-bolt' },
+                    { title: '退稅 (Tax Refund)', content: '在標有 Tax Refund/Tax Free 的店家，單筆消費滿 30,000 韓元可辦理退稅。部分店家提供現場即時退稅 (需出示護照)。', icon: 'fas fa-file-invoice-dollar' },
+                    { title: '環保政策', content: '韓國旅宿業配合政府減塑政策，通常「不提供」免費牙刷、牙膏、刮鬍刀等一次性備品，請務必自備。', icon: 'fas fa-leaf' }
+                ]);
+
+                const newExpenseItem = ref(''); const newExpensePrice = ref(''); const newExpenseWho = ref('two'); const newExpenseDate = ref(''); 
+                const newPackingItem = ref(''); const newPackingCategory = ref('特殊/其他');
+                const newItem = reactive({ time: '', title: '', location: '', naverLink: '', note: '', who: 'split' });
+                const newMapItem = reactive({ categoryIndex: 0, name: '', distance: '', desc: '', link: '' });
+                const newBackupItem = reactive({ name: '', area: '', img: '', link: '' });
+                const newNote = reactive({ title: '', content: '', icon: 'fas fa-info-circle' });
+
+                const selectedDayData = computed(() => itineraryData[selectedDayIndex.value]);
+                const groupedPackingList = computed(() => {
+                    const list = packingLists[packingPerson.value];
+                    const groups = {};
+                    packingCategories.forEach(cat => groups[cat] = []); 
+                    list.forEach(item => { if (!groups[item.category]) groups[item.category] = []; groups[item.category].push(item); });
+                    return groups;
+                });
+
+                const expenseStats = computed(() => {
+                    const stats = { total: 0, split: 0, two: 0, sia: 0 };
+                    expenses.forEach(item => {
+                        const val = item.isTwd ? item.amount : Math.round(item.amount * 0.023);
+                        stats.total += val;
+                        if(item.who === 'split') stats.split += val;
+                        else if(item.who === 'two') stats.two += val;
+                        else if(item.who === 'sia') stats.sia += val;
+                    });
+                    return stats;
+                });
+
+                const openAddModal = () => { modalMode.value = 'itinerary'; showModal.value = true; newItem.time = ''; newItem.title = ''; newItem.location = ''; newItem.note = ''; newItem.who = 'split'; };
+                const saveNewItem = () => { if(newItem.title) { itineraryData[selectedDayIndex.value].itinerary.push({...newItem}); itineraryData[selectedDayIndex.value].itinerary.sort((a,b) => a.time.localeCompare(b.time)); showModal.value = false; } };
+                const deleteItem = (idx) => { if(confirm('刪除此行程？')) itineraryData[selectedDayIndex.value].itinerary.splice(idx, 1); };
+                
+                const openMapModal = (catIdx, spotIdx) => { 
+                    modalMode.value = 'map'; showModal.value = true; editingMapItem.value = (catIdx !== null) ? {catIdx, spotIdx} : null;
+                    if(catIdx !== null) { const s = mapFacilities[catIdx].spots[spotIdx]; newMapItem.categoryIndex = catIdx; newMapItem.name = s.name; newMapItem.distance = s.distance; newMapItem.desc = s.desc; newMapItem.link = s.link; } 
+                    else { newMapItem.name = ''; newMapItem.distance = ''; newMapItem.desc = ''; newMapItem.link = ''; }
+                };
+                const saveMapSpot = () => {
+                    if(newMapItem.name) {
+                        if(editingMapItem.value) { mapFacilities[newMapItem.categoryIndex].spots[editingMapItem.value.spotIdx] = {...newMapItem}; } 
+                        else { mapFacilities[newMapItem.categoryIndex].spots.push({...newMapItem}); }
+                        showModal.value = false;
+                    }
+                };
+                const deleteMapSpot = (catIdx, spotIdx) => { if(confirm('刪除此地點？')) mapFacilities[catIdx].spots.splice(spotIdx, 1); };
+                const editMapSpot = (catIdx, spotIdx) => openMapModal(catIdx, spotIdx);
+
+                const openBackupModal = () => { modalMode.value = 'backup'; showModal.value = true; newBackupItem.name = ''; newBackupItem.area = ''; newBackupItem.img = ''; newBackupItem.link = ''; };
+                const saveBackupItem = () => { if(newBackupItem.name) { backupSpots.push({...newBackupItem}); showModal.value = false; } };
+                const deleteBackupSpot = (idx) => { if(confirm('刪除此景點？')) backupSpots.splice(idx, 1); };
+
+                const openNoteModal = () => { modalMode.value = 'note'; showModal.value = true; newNote.title = ''; newNote.content = ''; newNote.icon = 'fas fa-info-circle'; };
+                const saveNote = () => { if(newNote.title) { travelNotes.push({...newNote}); showModal.value = false; } };
+                const deleteNote = (idx) => { if(confirm('刪除此注意事項？')) travelNotes.splice(idx, 1); };
+
+                const addExpense = () => { if(newExpenseItem.value && newExpensePrice.value) { expenses.unshift({ item: newExpenseItem.value, amount: parseFloat(newExpensePrice.value), who: newExpenseWho.value, date: newExpenseDate.value || 'Today', isTwd: false }); newExpenseItem.value = ''; newExpensePrice.value = ''; } };
+                const deleteExpense = (idx) => { if(confirm('刪除這筆帳款？')) expenses.splice(idx, 1); };
+                const addPackingItem = () => { if(newPackingItem.value) { packingLists[packingPerson.value].push({ category: newPackingCategory.value, name: newPackingItem.value, checked: false, note: '' }); newPackingItem.value = ''; } };
+                const deletePackingItem = (itemToDelete) => { const list = packingLists[packingPerson.value]; const idx = list.indexOf(itemToDelete); if (idx > -1) list.splice(idx, 1); };
+                const copyAddress = () => { navigator.clipboard.writeText("서울 마포구 망원동 12-22"); alert("已複製韓文地址！"); };
+                const formatNumber = (n) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+
+                return {
+                    currentTab, showMap, tabs, days, selectedDayIndex, selectedDayData,
+                    headerTitle, headerSubtitle, passengerData, currentPassenger,
+                    expenses, newExpenseItem, newExpensePrice, newExpenseWho, newExpenseDate, addExpense, deleteExpense, expenseStats,
+                    packingPerson, groupedPackingList, newPackingItem, newPackingCategory, packingCategories, addPackingItem, deletePackingItem,
+                    showModal, modalMode, openAddModal, newItem, saveNewItem, deleteItem,
+                    openMapModal, newMapItem, saveMapSpot, deleteMapSpot, editMapSpot, editingMapItem,
+                    backupSpots, openBackupModal, newBackupItem, saveBackupItem, deleteBackupSpot,
+                    openNoteModal, newNote, saveNote, deleteNote,
+                    copyAddress, formatNumber, emergencyContacts, travelNotes, mapFacilities
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

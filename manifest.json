@@ -1,0 +1,15 @@
+{
+  "name": "首爾調頻｜12/16–20",
+  "short_name": "首爾調頻｜12/16–20",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F2F4F1",
+  "theme_color": "#4A5D45",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
