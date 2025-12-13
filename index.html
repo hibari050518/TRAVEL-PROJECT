@@ -164,7 +164,8 @@
                                         <span class="text-sm font-bold text-forest-deep font-serif">{{ item.time }}</span>
                                         <div class="h-full w-[1px] bg-gray-100 my-2 rounded-full"></div>
                                     </div>
-                                    <div class="flex-1 pr-8"> <div class="flex justify-between items-start">
+                                    <div class="flex-1 pr-8">
+                                        <div class="flex justify-between items-start">
                                             <h3 class="font-bold text-gray-800 text-lg">{{ item.title }}</h3>
                                             <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ml-2 whitespace-nowrap"
                                                   :class="item.who === 'two' ? 'bg-two text-white' : (item.who === 'sia' ? 'bg-sia text-white' : 'bg-gray-200 text-gray-500')">
@@ -317,7 +318,11 @@
                                      :class="exp.who === 'split' ? 'bg-earth' : (exp.who === 'two' ? 'bg-two' : 'bg-sia')">
                                     {{ exp.who === 'split' ? '公' : (exp.who === 'two' ? '禿' : '夏') }}
                                 </div>
-                                <div><p class="font-bold text-sm text-gray-700">{{ exp.item }}</p><p class="text-[10px] text-gray-400 flex items-center gap-2"><span>{{ exp.date }}</span></p></div>
+                                <div class="flex-1">
+                                    <p class="font-bold text-sm text-gray-700">{{ exp.item }}</p>
+                                    <p class="text-[10px] text-gray-400 flex items-center gap-2"><span>{{ exp.date }}</span></p>
+                                    <p v-if="exp.note" class="text-[10px] text-gray-400 break-all">{{ exp.note }}</p>
+                                </div>
                             </div>
                             <div class="text-right flex items-center gap-3">
                                 <div><p class="font-bold text-sm text-gray-800">{{ exp.isTwd ? 'NT$' : '₩' }}{{ formatNumber(exp.amount) }}</p><p v-if="!exp.isTwd" class="text-[10px] text-gray-400">≈ ${{ Math.round(exp.amount * 0.023) }}</p></div>
@@ -331,15 +336,24 @@
                     <div class="mt-4 pt-4 border-t border-gray-100 relative z-20 bg-white">
                         <div v-if="editingExpenseIndex !== null" class="text-center text-xs text-orange-500 font-bold mb-2">正在編輯項目... <button @click="cancelEditExpense" class="text-gray-400 underline ml-2">取消</button></div>
                         <div class="flex gap-2 mb-3">
-                            <input type="date" v-model="newExpenseDate" class="bg-gray-50 rounded-xl px-3 py-2 text-[10px] w-1/3 outline-none text-gray-500 focus:bg-white focus:ring-1 focus:ring-forest-light">
-                            <div class="flex bg-gray-50 rounded-xl p-1 flex-1">
+                            <input type="date" v-model="newExpenseDate" class="bg-gray-50 rounded-xl px-2 py-2 text-[10px] w-[30%] outline-none text-gray-500 focus:bg-white focus:ring-1 focus:ring-forest-light">
+                            <div class="flex bg-gray-50 rounded-xl p-1 w-[40%]">
                                 <button v-for="opt in [{v:'two',l:'Two'},{v:'sia',l:'Sia'},{v:'split',l:'公'}]" @click="newExpenseWho = opt.v" class="flex-1 rounded-lg text-xs font-bold transition-all" :class="newExpenseWho === opt.v ? 'bg-white shadow-sm text-forest-deep' : 'text-gray-400 hover:text-gray-600'">{{ opt.l }}</button>
                             </div>
+                            <div class="w-[30%]">
+                                <select v-model="newExpenseCurrency" class="w-full h-full bg-gray-50 rounded-xl px-2 text-xs outline-none text-gray-600 font-bold focus:bg-white focus:ring-1 focus:ring-forest-light">
+                                    <option value="KRW">₩ KRW</option>
+                                    <option value="TWD">NT$ TWD</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 mb-3">
+                            <input v-model="newExpenseItem" type="text" placeholder="項目" class="flex-[2] bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
+                            <input v-model="newExpensePrice" type="number" placeholder="金額" class="flex-1 bg-gray-50 rounded-xl px-3 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
                         </div>
                         <div class="flex gap-2">
-                            <input v-model="newExpenseItem" type="text" placeholder="項目" class="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
-                            <input v-model="newExpensePrice" type="number" placeholder="金額" class="w-20 bg-gray-50 rounded-xl px-3 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
-                            <button @click="saveExpense" class="bg-forest-main text-white rounded-xl px-4 shadow-lg active:scale-95 transition hover:bg-forest-deep">
+                            <input v-model="newExpenseNote" type="text" placeholder="備註 (選填)" class="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
+                            <button @click="saveExpense" class="bg-forest-main text-white rounded-xl px-6 shadow-lg active:scale-95 transition hover:bg-forest-deep">
                                 <i :class="editingExpenseIndex !== null ? 'fas fa-save' : 'fas fa-plus'"></i>
                             </button>
                         </div>
@@ -523,8 +537,8 @@
                 const modalMode = ref('itinerary'); 
                 const packingPerson = ref('two'); 
                 const editingMapItem = ref(null); 
-                const editingItemIndex = ref(null); // 新增：追蹤正在編輯的行程索引
-                const editingExpenseIndex = ref(null); // 新增：追蹤正在編輯的記帳索引
+                const editingItemIndex = ref(null);
+                const editingExpenseIndex = ref(null);
 
                 // Header Logic
                 const headerTitle = computed(() => ({ home: 'Seoul Trip', ticket: 'Flight Ticket', stay: 'Accommodation', money: 'Trip Wallet', guide: 'Travel Guide' }[currentTab.value]));
@@ -612,7 +626,7 @@
                     two: { name: 'MS CHEN/YI CHUN (禿 Two)', pnr: 'D5XG3G', seatOut: '28F', baggage: '20KG (15+5)', link: 'https://drive.google.com/file/d/1kdUk2LDfbx4Bh8FDfyJqrWAAPdnSoqVt/view?usp=sharing' },
                     sia: { name: 'Yu Fan Chen (夏 Sia)', pnr: 'D8A4YY', seatOut: '--', baggage: '15KG', linkOut: 'https://drive.google.com/file/d/1e48Nk3taZQ_4O0u_a__38-fFObRsV5As/view?usp=sharing', linkIn: 'https://drive.google.com/file/d/1N-zB6sZ-qdndLmcFZTeHk2pA_rWz4Cm7/view?usp=sharing' }
                 };
-                const expenses = reactive([ { item: '機票 & 住宿分攤', amount: 10852.23, who: 'split', date: '預付', isTwd: true }, { item: '機場巴士', amount: 18000, who: 'two', date: '12/16', isTwd: false } ]);
+                const expenses = reactive([ { item: '機票 & 住宿分攤', amount: 10852.23, who: 'split', date: '預付', isTwd: true, note: '已付款' }, { item: '機場巴士', amount: 18000, who: 'two', date: '12/16', isTwd: false, note: '' } ]);
                 
                 const basePackingList = [
                     { category: '文件', name: '護照', note: '有效期至少 6 個月', checked: false },
@@ -663,6 +677,8 @@
                 ]);
 
                 const newExpenseItem = ref(''); const newExpensePrice = ref(''); const newExpenseWho = ref('two'); const newExpenseDate = ref(''); 
+                const newExpenseCurrency = ref('KRW'); const newExpenseNote = ref(''); // 新增幣別和備註的變數
+                
                 const newPackingItem = ref(''); const newPackingCategory = ref('特殊/其他');
                 const newItem = reactive({ time: '', title: '', location: '', naverLink: '', note: '', who: 'split' });
                 const newMapItem = reactive({ categoryIndex: 0, name: '', distance: '', desc: '', link: '' });
@@ -690,18 +706,17 @@
                     return stats;
                 });
 
-                // 修改：行程的新增與編輯邏輯
                 const openAddModal = () => { 
                     modalMode.value = 'itinerary'; 
                     showModal.value = true; 
-                    editingItemIndex.value = null; // 重置編輯索引，表示這是新增
+                    editingItemIndex.value = null; 
                     newItem.time = ''; newItem.title = ''; newItem.location = ''; newItem.note = ''; newItem.who = 'split'; 
                 };
                 
                 const openEditItemModal = (idx) => {
                     const item = itineraryData[selectedDayIndex.value].itinerary[idx];
-                    Object.assign(newItem, item); // 將現有資料填入 Modal
-                    editingItemIndex.value = idx; // 標記正在編輯的索引
+                    Object.assign(newItem, item); 
+                    editingItemIndex.value = idx; 
                     modalMode.value = 'itinerary';
                     showModal.value = true;
                 }
@@ -709,13 +724,10 @@
                 const saveNewItem = () => { 
                     if(newItem.title) { 
                         if (editingItemIndex.value !== null) {
-                            // 編輯模式：更新現有項目
                             itineraryData[selectedDayIndex.value].itinerary[editingItemIndex.value] = {...newItem};
                         } else {
-                            // 新增模式：推入新項目
                             itineraryData[selectedDayIndex.value].itinerary.push({...newItem}); 
                         }
-                        // 重新排序
                         itineraryData[selectedDayIndex.value].itinerary.sort((a,b) => a.time.localeCompare(b.time)); 
                         showModal.value = false; 
                     } 
@@ -745,21 +757,26 @@
                 const saveNote = () => { if(newNote.title) { travelNotes.push({...newNote}); showModal.value = false; } };
                 const deleteNote = (idx) => { if(confirm('刪除此注意事項？')) travelNotes.splice(idx, 1); };
 
-                // 修改：記帳的新增與編輯邏輯
                 const saveExpense = () => { 
                     if(newExpenseItem.value && newExpensePrice.value) { 
-                        const expenseData = { item: newExpenseItem.value, amount: parseFloat(newExpensePrice.value), who: newExpenseWho.value, date: newExpenseDate.value || 'Today', isTwd: false };
+                        const expenseData = { 
+                            item: newExpenseItem.value, 
+                            amount: parseFloat(newExpensePrice.value), 
+                            who: newExpenseWho.value, 
+                            date: newExpenseDate.value || 'Today', 
+                            isTwd: newExpenseCurrency.value === 'TWD', // 根據選擇的幣別設定
+                            note: newExpenseNote.value // 儲存備註
+                        };
                         
                         if (editingExpenseIndex.value !== null) {
-                            // 編輯模式
                             expenses[editingExpenseIndex.value] = expenseData;
-                            editingExpenseIndex.value = null; // 重置
+                            editingExpenseIndex.value = null; 
                         } else {
-                            // 新增模式
                             expenses.unshift(expenseData); 
                         }
-                        // 清空輸入
-                        newExpenseItem.value = ''; newExpensePrice.value = ''; 
+                        
+                        // 重置欄位，包含幣別預設回 KRW
+                        newExpenseItem.value = ''; newExpensePrice.value = ''; newExpenseNote.value = ''; newExpenseCurrency.value = 'KRW';
                     } 
                 };
                 const editExpense = (idx) => {
@@ -768,13 +785,14 @@
                     newExpensePrice.value = exp.amount;
                     newExpenseWho.value = exp.who;
                     newExpenseDate.value = exp.date;
+                    newExpenseCurrency.value = exp.isTwd ? 'TWD' : 'KRW'; // 帶出原本的幣別
+                    newExpenseNote.value = exp.note || ''; // 帶出原本的備註
                     editingExpenseIndex.value = idx;
                 };
                 const cancelEditExpense = () => {
                     editingExpenseIndex.value = null;
-                    newExpenseItem.value = ''; newExpensePrice.value = ''; 
+                    newExpenseItem.value = ''; newExpensePrice.value = ''; newExpenseNote.value = ''; newExpenseCurrency.value = 'KRW';
                 };
-                // 為了兼容舊的 click handler，這裡保留 addExpense 但指向 saveExpense
                 const addExpense = saveExpense; 
 
                 const deleteExpense = (idx) => { if(confirm('刪除這筆帳款？')) expenses.splice(idx, 1); };
@@ -793,9 +811,9 @@
                     backupSpots, openBackupModal, newBackupItem, saveBackupItem, deleteBackupSpot,
                     openNoteModal, newNote, saveNote, deleteNote,
                     copyAddress, formatNumber, emergencyContacts, travelNotes, mapFacilities,
-                    // 新增回傳給 template 使用的變數與函式
                     openEditItemModal, editingItemIndex,
-                    saveExpense, editExpense, editingExpenseIndex, cancelEditExpense
+                    saveExpense, editExpense, editingExpenseIndex, cancelEditExpense,
+                    newExpenseCurrency, newExpenseNote // 新增變數回傳
                 };
             }
         }).mount('#app');
