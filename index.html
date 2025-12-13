@@ -155,14 +155,16 @@
                         <transition-group name="slide-up">
                             <div v-for="(item, idx) in selectedDayData.itinerary" :key="item.time + idx" 
                                  class="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-forest-light relative group hover:border-forest-main transition-colors">
-                                <button @click="deleteItem(idx)" class="absolute top-3 right-3 text-gray-200 hover:text-alert transition w-6 h-6 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                                <div class="absolute top-3 right-3 flex gap-2">
+                                    <button @click="openEditItemModal(idx)" class="text-gray-200 hover:text-forest-main transition w-6 h-6 flex items-center justify-center"><i class="fas fa-pen"></i></button>
+                                    <button @click="deleteItem(idx)" class="text-gray-200 hover:text-alert transition w-6 h-6 flex items-center justify-center"><i class="fas fa-times"></i></button>
+                                </div>
                                 <div class="flex gap-4">
                                     <div class="flex flex-col items-center pt-1 w-12 flex-shrink-0">
                                         <span class="text-sm font-bold text-forest-deep font-serif">{{ item.time }}</span>
                                         <div class="h-full w-[1px] bg-gray-100 my-2 rounded-full"></div>
                                     </div>
-                                    <div class="flex-1">
-                                        <div class="flex justify-between items-start">
+                                    <div class="flex-1 pr-8"> <div class="flex justify-between items-start">
                                             <h3 class="font-bold text-gray-800 text-lg">{{ item.title }}</h3>
                                             <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ml-2 whitespace-nowrap"
                                                   :class="item.who === 'two' ? 'bg-two text-white' : (item.who === 'sia' ? 'bg-sia text-white' : 'bg-gray-200 text-gray-500')">
@@ -319,11 +321,15 @@
                             </div>
                             <div class="text-right flex items-center gap-3">
                                 <div><p class="font-bold text-sm text-gray-800">{{ exp.isTwd ? 'NT$' : '₩' }}{{ formatNumber(exp.amount) }}</p><p v-if="!exp.isTwd" class="text-[10px] text-gray-400">≈ ${{ Math.round(exp.amount * 0.023) }}</p></div>
-                                <button @click="deleteExpense(i)" class="w-8 h-8 rounded-full bg-white text-gray-300 flex items-center justify-center hover:text-alert hover:bg-red-50 shadow-sm opacity-0 group-hover:opacity-100 transition duration-200"><i class="fas fa-trash-alt text-xs"></i></button>
+                                <div class="flex gap-1">
+                                    <button @click="editExpense(i)" class="w-8 h-8 rounded-full bg-white text-gray-300 flex items-center justify-center hover:text-forest-main hover:bg-green-50 shadow-sm opacity-0 group-hover:opacity-100 transition duration-200"><i class="fas fa-pen text-xs"></i></button>
+                                    <button @click="deleteExpense(i)" class="w-8 h-8 rounded-full bg-white text-gray-300 flex items-center justify-center hover:text-alert hover:bg-red-50 shadow-sm opacity-0 group-hover:opacity-100 transition duration-200"><i class="fas fa-trash-alt text-xs"></i></button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-100 z-10">
+                    <div class="mt-4 pt-4 border-t border-gray-100 relative z-20 bg-white">
+                        <div v-if="editingExpenseIndex !== null" class="text-center text-xs text-orange-500 font-bold mb-2">正在編輯項目... <button @click="cancelEditExpense" class="text-gray-400 underline ml-2">取消</button></div>
                         <div class="flex gap-2 mb-3">
                             <input type="date" v-model="newExpenseDate" class="bg-gray-50 rounded-xl px-3 py-2 text-[10px] w-1/3 outline-none text-gray-500 focus:bg-white focus:ring-1 focus:ring-forest-light">
                             <div class="flex bg-gray-50 rounded-xl p-1 flex-1">
@@ -333,7 +339,9 @@
                         <div class="flex gap-2">
                             <input v-model="newExpenseItem" type="text" placeholder="項目" class="flex-1 bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
                             <input v-model="newExpensePrice" type="number" placeholder="金額" class="w-20 bg-gray-50 rounded-xl px-3 py-3 text-sm outline-none focus:bg-white focus:ring-1 focus:ring-forest-light transition">
-                            <button @click="addExpense" class="bg-forest-main text-white rounded-xl px-4 shadow-lg active:scale-95 transition hover:bg-forest-deep"><i class="fas fa-plus"></i></button>
+                            <button @click="saveExpense" class="bg-forest-main text-white rounded-xl px-4 shadow-lg active:scale-95 transition hover:bg-forest-deep">
+                                <i :class="editingExpenseIndex !== null ? 'fas fa-save' : 'fas fa-plus'"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -431,7 +439,7 @@
             <div class="bg-white w-full rounded-[30px] p-6 shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto">
                 
                 <div v-if="modalMode === 'itinerary'">
-                    <h3 class="font-bold text-xl mb-6 text-forest-deep font-serif italic text-center">New Activity</h3>
+                    <h3 class="font-bold text-xl mb-6 text-forest-deep font-serif italic text-center">{{ editingItemIndex !== null ? 'Edit Activity' : 'New Activity' }}</h3>
                     <input v-model="newItem.time" type="time" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition text-gray-600">
                     <input v-model="newItem.title" type="text" placeholder="行程名稱" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition">
                     <input v-model="newItem.location" type="text" placeholder="地點" class="w-full bg-gray-50 p-4 rounded-2xl mb-3 outline-none border border-transparent focus:border-forest-light focus:bg-white transition">
@@ -515,6 +523,8 @@
                 const modalMode = ref('itinerary'); 
                 const packingPerson = ref('two'); 
                 const editingMapItem = ref(null); 
+                const editingItemIndex = ref(null); // 新增：追蹤正在編輯的行程索引
+                const editingExpenseIndex = ref(null); // 新增：追蹤正在編輯的記帳索引
 
                 // Header Logic
                 const headerTitle = computed(() => ({ home: 'Seoul Trip', ticket: 'Flight Ticket', stay: 'Accommodation', money: 'Trip Wallet', guide: 'Travel Guide' }[currentTab.value]));
@@ -680,8 +690,36 @@
                     return stats;
                 });
 
-                const openAddModal = () => { modalMode.value = 'itinerary'; showModal.value = true; newItem.time = ''; newItem.title = ''; newItem.location = ''; newItem.note = ''; newItem.who = 'split'; };
-                const saveNewItem = () => { if(newItem.title) { itineraryData[selectedDayIndex.value].itinerary.push({...newItem}); itineraryData[selectedDayIndex.value].itinerary.sort((a,b) => a.time.localeCompare(b.time)); showModal.value = false; } };
+                // 修改：行程的新增與編輯邏輯
+                const openAddModal = () => { 
+                    modalMode.value = 'itinerary'; 
+                    showModal.value = true; 
+                    editingItemIndex.value = null; // 重置編輯索引，表示這是新增
+                    newItem.time = ''; newItem.title = ''; newItem.location = ''; newItem.note = ''; newItem.who = 'split'; 
+                };
+                
+                const openEditItemModal = (idx) => {
+                    const item = itineraryData[selectedDayIndex.value].itinerary[idx];
+                    Object.assign(newItem, item); // 將現有資料填入 Modal
+                    editingItemIndex.value = idx; // 標記正在編輯的索引
+                    modalMode.value = 'itinerary';
+                    showModal.value = true;
+                }
+
+                const saveNewItem = () => { 
+                    if(newItem.title) { 
+                        if (editingItemIndex.value !== null) {
+                            // 編輯模式：更新現有項目
+                            itineraryData[selectedDayIndex.value].itinerary[editingItemIndex.value] = {...newItem};
+                        } else {
+                            // 新增模式：推入新項目
+                            itineraryData[selectedDayIndex.value].itinerary.push({...newItem}); 
+                        }
+                        // 重新排序
+                        itineraryData[selectedDayIndex.value].itinerary.sort((a,b) => a.time.localeCompare(b.time)); 
+                        showModal.value = false; 
+                    } 
+                };
                 const deleteItem = (idx) => { if(confirm('刪除此行程？')) itineraryData[selectedDayIndex.value].itinerary.splice(idx, 1); };
                 
                 const openMapModal = (catIdx, spotIdx) => { 
@@ -707,7 +745,38 @@
                 const saveNote = () => { if(newNote.title) { travelNotes.push({...newNote}); showModal.value = false; } };
                 const deleteNote = (idx) => { if(confirm('刪除此注意事項？')) travelNotes.splice(idx, 1); };
 
-                const addExpense = () => { if(newExpenseItem.value && newExpensePrice.value) { expenses.unshift({ item: newExpenseItem.value, amount: parseFloat(newExpensePrice.value), who: newExpenseWho.value, date: newExpenseDate.value || 'Today', isTwd: false }); newExpenseItem.value = ''; newExpensePrice.value = ''; } };
+                // 修改：記帳的新增與編輯邏輯
+                const saveExpense = () => { 
+                    if(newExpenseItem.value && newExpensePrice.value) { 
+                        const expenseData = { item: newExpenseItem.value, amount: parseFloat(newExpensePrice.value), who: newExpenseWho.value, date: newExpenseDate.value || 'Today', isTwd: false };
+                        
+                        if (editingExpenseIndex.value !== null) {
+                            // 編輯模式
+                            expenses[editingExpenseIndex.value] = expenseData;
+                            editingExpenseIndex.value = null; // 重置
+                        } else {
+                            // 新增模式
+                            expenses.unshift(expenseData); 
+                        }
+                        // 清空輸入
+                        newExpenseItem.value = ''; newExpensePrice.value = ''; 
+                    } 
+                };
+                const editExpense = (idx) => {
+                    const exp = expenses[idx];
+                    newExpenseItem.value = exp.item;
+                    newExpensePrice.value = exp.amount;
+                    newExpenseWho.value = exp.who;
+                    newExpenseDate.value = exp.date;
+                    editingExpenseIndex.value = idx;
+                };
+                const cancelEditExpense = () => {
+                    editingExpenseIndex.value = null;
+                    newExpenseItem.value = ''; newExpensePrice.value = ''; 
+                };
+                // 為了兼容舊的 click handler，這裡保留 addExpense 但指向 saveExpense
+                const addExpense = saveExpense; 
+
                 const deleteExpense = (idx) => { if(confirm('刪除這筆帳款？')) expenses.splice(idx, 1); };
                 const addPackingItem = () => { if(newPackingItem.value) { packingLists[packingPerson.value].push({ category: newPackingCategory.value, name: newPackingItem.value, checked: false, note: '' }); newPackingItem.value = ''; } };
                 const deletePackingItem = (itemToDelete) => { const list = packingLists[packingPerson.value]; const idx = list.indexOf(itemToDelete); if (idx > -1) list.splice(idx, 1); };
@@ -723,7 +792,10 @@
                     openMapModal, newMapItem, saveMapSpot, deleteMapSpot, editMapSpot, editingMapItem,
                     backupSpots, openBackupModal, newBackupItem, saveBackupItem, deleteBackupSpot,
                     openNoteModal, newNote, saveNote, deleteNote,
-                    copyAddress, formatNumber, emergencyContacts, travelNotes, mapFacilities
+                    copyAddress, formatNumber, emergencyContacts, travelNotes, mapFacilities,
+                    // 新增回傳給 template 使用的變數與函式
+                    openEditItemModal, editingItemIndex,
+                    saveExpense, editExpense, editingExpenseIndex, cancelEditExpense
                 };
             }
         }).mount('#app');
