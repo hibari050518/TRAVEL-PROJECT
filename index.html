@@ -222,13 +222,21 @@
                     <div class="absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-forest-deep rounded-full transition-all duration-300 shadow-md"
                          :class="currentPassenger === 'two' ? 'left-1.5' : 'translate-x-full left-[-3px]'"></div>
                 </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-start gap-3">
+                    <div class="text-yellow-500 text-lg"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="text-xs text-yellow-800 leading-relaxed font-bold">
+                        請提前 2 - 2.5 小時抵達機場辦理登機手續。<br>
+                        Please arrive at the airport 2-2.5 hours prior to departure.
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-[24px] overflow-hidden shadow-card border border-white relative group">
                     <div class="bg-forest-deep px-6 py-4 flex justify-between items-center text-white">
                         <span class="font-bold text-sm tracking-wider">T'way Air</span>
                         <div class="flex gap-2"><span class="text-[10px] border border-white/30 px-2 py-0.5 rounded font-mono">ECO</span></div>
                     </div>
                     <div class="p-6">
-                        <div class="flex justify-between items-center text-center mb-8 relative">
+                        <div class="flex justify-between items-center text-center mb-4 relative">
                             <div class="relative z-10"><div class="text-4xl font-serif italic text-forest-dark">RMQ</div><div class="text-xs text-gray-400 font-bold mt-1 tracking-widest">TAICHUNG</div></div>
                             <div class="flex-1 px-4 flex flex-col items-center">
                                 <i class="fas fa-plane text-forest-main mb-2 transform rotate-12 text-xl"></i>
@@ -237,6 +245,18 @@
                             </div>
                             <div class="relative z-10"><div class="text-4xl font-serif italic text-forest-dark">ICN</div><div class="text-xs text-gray-400 font-bold mt-1 tracking-widest">SEOUL</div></div>
                         </div>
+                        
+                        <div class="flex justify-between text-center mb-6 px-2">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">去程 Outbound</p>
+                                <p class="text-lg font-bold text-forest-deep font-mono">17:40 - 21:10</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">回程 Inbound</p>
+                                <p class="text-lg font-bold text-forest-deep font-mono">14:25 - 16:40</p>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4 bg-forest-bg/50 p-5 rounded-2xl mb-6 border border-forest-light/30">
                             <div><p class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Passenger</p><p class="text-xs font-bold text-gray-800">{{ passengerData[currentPassenger].name }}</p></div>
                             <div><p class="text-[10px] text-gray-400 uppercase tracking-wide mb-0.5">Baggage</p><p class="text-xs font-bold text-forest-deep bg-white/80 px-2 py-0.5 rounded inline-block shadow-sm">{{ passengerData[currentPassenger].baggage }}</p></div>
@@ -635,7 +655,7 @@
 
                 const passengerData = {
                     two: { name: 'MS CHEN/YI CHUN (禿 Two)', pnr: 'D5XG3G', seatOut: '28F', baggage: '20KG (15+5)', link: 'https://drive.google.com/file/d/1kdUk2LDfbx4Bh8FDfyJqrWAAPdnSoqVt/view?usp=sharing' },
-                    sia: { name: 'Yu Fan Chen (夏 Sia)', pnr: 'D8A4YY', seatOut: '--', baggage: '15KG', linkOut: 'https://drive.google.com/file/d/1e48Nk3taZQ_4O0u_a__38-fFObRsV5As/view?usp=sharing', linkIn: 'https://drive.google.com/file/d/1N-zB6sZ-qdndLmcFZTeHk2pA_rWz4Cm7/view?usp=sharing' }
+                    sia: { name: 'Yu Fan Chen (夏 Sia)', pnr: 'D8A4YY', seatOut: '--', baggage: '15KG', linkOut: 'https://drive.google.com/file/d/1eXuI7Nt0Yp0gv597kgLdks7kLwpxHm0E/view?usp=sharing', linkIn: 'https://drive.google.com/file/d/1zN0nBibImEvdGUV7srER0yWkzqUZmqJu/view?usp=sharing' }
                 };
                 const expenses = reactive([ { item: '機票 & 住宿分攤', amount: 10852.23, who: 'split', date: '預付', isTwd: true, note: '已付款' }, { item: '機場巴士', amount: 18000, who: 'two', date: '12/16', isTwd: false, note: '' } ]);
                 
