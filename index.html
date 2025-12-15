@@ -16,10 +16,6 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 
-    <script type="module">
-        // 預載
-    </script>
-
     <script>
         tailwind.config = {
             theme: {
@@ -44,7 +40,6 @@
         .slide-up-enter-active { transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .slide-up-enter-from { transform: translateY(30px); opacity: 0; }
         
-        /* 讀取中的遮罩 */
         #loading-screen { position: fixed; inset: 0; background: #F2F4F1; z-index: 100; display: flex; justify-content: center; align-items: center; transition: opacity 0.5s; }
         .spinner { width: 40px; height: 40px; border: 4px solid #DCE3D8; border-top-color: #4A5D45; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -188,10 +183,11 @@
             </div>
 
             <div v-if="currentTab === 'guide'" class="space-y-6 pt-2 animate-slide-up">
-                
                 <div class="bg-white rounded-[24px] p-6 shadow-card"><div class="flex justify-between items-center mb-6"><h3 class="font-bold text-forest-deep text-lg">Packing List</h3><div class="flex bg-forest-bg p-1 rounded-xl"><button @click="packingPerson = 'two'" class="px-4 py-1.5 text-xs rounded-lg transition-all duration-300" :class="packingPerson === 'two' ? 'bg-white shadow-sm text-forest-deep font-bold' : 'text-gray-400 hover:text-gray-600'">禿 (Two)</button><button @click="packingPerson = 'sia'" class="px-4 py-1.5 text-xs rounded-lg transition-all duration-300" :class="packingPerson === 'sia' ? 'bg-white shadow-sm text-forest-deep font-bold' : 'text-gray-400 hover:text-gray-600'">夏 (Sia)</button></div></div><div class="space-y-6 mb-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar"><div v-for="(items, category) in groupedPackingList" :key="category"><h4 class="text-[10px] font-bold text-forest-main uppercase mb-2 border-b border-forest-light/30 pb-1">{{ category }}</h4><div class="space-y-2"><div v-for="(item, idx) in items" :key="idx" class="flex items-start group p-1 hover:bg-gray-50 rounded-lg transition"><label class="flex items-start gap-3 cursor-pointer flex-1 select-none"><div class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-200 mt-0.5" :class="item.checked ? 'bg-forest-deep border-forest-deep scale-110' : 'border-gray-300 bg-white'"><i v-if="item.checked" class="fas fa-check text-white text-[10px]"></i></div><div class="flex-1"><span class="text-sm transition-all duration-200 block" :class="item.checked ? 'text-gray-300 line-through' : 'text-gray-700'">{{ item.name }}</span><span v-if="item.note" class="text-[10px] text-orange-400 block mt-0.5">{{ item.note }}</span></div><input type="checkbox" v-model="item.checked" class="hidden"></label><button @click="deletePackingItem(item)" class="text-gray-300 hover:text-alert px-2 opacity-0 group-hover:opacity-100 transition"><i class="fas fa-times"></i></button></div></div></div></div><div class="flex gap-2 pt-3 border-t border-gray-100"><select v-model="newPackingCategory" class="bg-gray-50 rounded-xl px-2 py-2 text-[10px] outline-none w-20 text-gray-500"><option v-for="cat in packingCategories" :value="cat">{{ cat }}</option></select><input v-model="newPackingItem" type="text" placeholder="新增物品..." class="flex-1 bg-gray-50 rounded-xl px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-forest-light"><button @click="addPackingItem" class="text-white bg-forest-light hover:bg-forest-main w-8 h-8 rounded-full flex items-center justify-center transition shadow-sm"><i class="fas fa-plus text-xs"></i></button></div></div>
                 <a href="https://www.ccesim.com/collections/KR?menu_id=37500" target="_blank" class="block bg-gray-800 rounded-2xl p-4 shadow-lg text-white flex justify-between items-center group overflow-hidden relative"><div class="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-white/10 to-transparent"></div><div class="flex items-center gap-3 relative z-10"><div class="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-sm"><i class="fas fa-sim-card"></i></div><div><p class="font-bold text-sm">購買韓國 eSim</p><p class="text-[10px] text-gray-400">CCESIM 網卡連結</p></div></div><i class="fas fa-external-link-alt opacity-50 group-hover:translate-x-1 transition relative z-10"></i></a>
-                <div class="grid grid-cols-1 gap-4 pb-6"><div class="bg-white p-5 rounded-2xl border border-red-100 shadow-sm"><h4 class="text-alert font-bold text-sm mb-4 uppercase flex items-center"><i class="fas fa-exclamation-circle mr-2"></i>緊急聯絡 Emergency</h4><div class="grid grid-cols-2 gap-x-4 gap-y-3"><div v-for="contact in emergencyContacts" :key="contact.name" class="border-b border-gray-50 pb-2"><span class="block text-[10px] text-gray-500 mb-0.5">{{ contact.name }}</span><b class="text-sm text-gray-800 tracking-wide block select-all">{{ contact.phone }}</b></div></div></div><div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm"><div class="flex justify-between items-center mb-4"><h4 class="text-blue-600 font-bold text-sm uppercase flex items-center"><i class="fas fa-info-circle mr-2"></i>注意事項 Notes</h4><button @click="openNoteModal" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-100 font-bold transition"><i class="fas fa-plus mr-1"></i>新增</button></div><ul class="space-y-4"><li v-for="(note, idx) in travelNotes" :key="idx" class="flex items-start gap-3 border-b border-blue-50/50 pb-3 last:border-0 group relative"><div class="w-7 h-7 rounded-full bg-blue-50 text-blue-400 flex items-center justify-center shrink-0 mt-0.5"><i :class="note.icon" class="text-xs"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-700 mb-1">{{ note.title }}</p><p class="text-[11px] text-gray-500 leading-relaxed text-justify whitespace-pre-wrap">{{ note.content }}</p></div><button @click="deleteNote(idx)" class="absolute top-0 right-0 text-gray-300 hover:text-alert opacity-0 group-hover:opacity-100 transition"><i class="fas fa-trash text-xs"></i></button></li></ul></div></div>
+                <div class="grid grid-cols-1 gap-4 pb-6"><div class="bg-white p-5 rounded-2xl border border-red-100 shadow-sm"><h4 class="text-alert font-bold text-sm mb-4 uppercase flex items-center"><i class="fas fa-exclamation-circle mr-2"></i>緊急聯絡 Emergency</h4><div class="grid grid-cols-2 gap-x-4 gap-y-3"><div v-for="contact in emergencyContacts" :key="contact.name" class="border-b border-gray-50 pb-2"><span class="block text-[10px] text-gray-500 mb-0.5">{{ contact.name }}</span><b class="text-sm text-gray-800 tracking-wide block select-all">{{ contact.phone }}</b></div></div></div><div class="bg-white p-5 rounded-2xl border border-blue-100 shadow-sm"><div class="flex justify-between items-center mb-4"><h4 class="text-blue-600 font-bold text-sm uppercase flex items-center"><i class="fas fa-info-circle mr-2"></i>注意事項 Notes</h4><button @click="openNoteModal" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full hover:bg-blue-100 font-bold transition"><i class="fas fa-plus mr-1"></i>新增</button></div><ul class="space-y-4"><li v-for="(note, idx) in travelNotes" :key="idx" class="flex items-start gap-3 border-b border-blue-50/50 pb-3 last:border-0 group relative"><div class="w-7 h-7 rounded-full bg-blue-50 text-blue-400 flex items-center justify-center shrink-0 mt-0.5"><i :class="note.icon" class="text-xs"></i></div><div class="flex-1"><p class="text-xs font-bold text-gray-700 mb-1">{{ note.title }}</p><p class="text-[11px] text-gray-500 leading-relaxed text-justify whitespace-pre-wrap">{{ note.content }}</p></div><button @click="deleteNote(idx)" class="absolute top-0 right-0 text-gray-300 hover:text-alert opacity-0 group-hover:opacity-100 transition"><i class="fas fa-trash text-xs"></i></button></li></ul></div>
+                <button @click="forceResetToDefault" class="w-full py-3 bg-red-100 text-red-500 rounded-xl font-bold text-xs mb-8 flex items-center justify-center"><i class="fas fa-exclamation-triangle mr-2"></i>資料沒出現？點我恢復預設值</button>
+                </div>
             </div>
         </main>
 
@@ -265,7 +261,6 @@
 
         createApp({
             setup() {
-                // ... 所有的資料定義 ...
                 const currentTab = ref('home');
                 const showMap = ref(false);
                 const selectedDayIndex = ref(0);
@@ -276,27 +271,33 @@
                 const editingMapItem = ref(null); 
                 const editingItemIndex = ref(null);
                 const editingExpenseIndex = ref(null);
-                const syncStatus = ref('synced'); // saving, synced, error
+                const syncStatus = ref('synced'); 
 
                 const headerTitle = computed(() => ({ home: 'Seoul Trip', ticket: 'Flight Ticket', stay: 'Accommodation', money: 'Trip Wallet', guide: 'Travel Guide' }[currentTab.value]));
                 const headerSubtitle = computed(() => ({ home: 'Dec 16 - Dec 20', ticket: 'E-Ticket Info', stay: 'Soon Stay Mangwon', money: 'Shared Expenses', guide: 'Checklist & Tips' }[currentTab.value]));
                 const tabs = [{ id: 'home', icon: 'fas fa-tree', label: '行程' }, { id: 'ticket', icon: 'fas fa-plane', label: '機票' }, { id: 'stay', icon: 'fas fa-bed', label: '住宿' }, { id: 'money', icon: 'fas fa-wallet', label: '記帳' }, { id: 'guide', icon: 'fas fa-suitcase', label: '指南' }];
                 const days = [{ date: '12/16', week: 'TUE' }, { date: '12/17', week: 'WED' }, { date: '12/18', week: 'THU' }, { date: '12/19', week: 'FRI' }, { date: '12/20', week: 'SAT' }];
 
-                // 定義 Reactive Data (初始值 - 你的原始資料)
-                const itineraryData = reactive({ 0: { weather: { temp: '-1°C', icon: 'fas fa-cloud', desc: '多雲 Dry' }, itinerary: [{ time: '17:40', title: '飛往首爾', location: 'RMQ Airport', note: '提早 2.5 小時抵達機場', naverLink: '', who: 'split' }, { time: '22:30', title: '前往民宿', location: 'Soon Stay', note: '機場巴士 6002 -> Holt 站 -> Taxi', naverLink: '', who: 'split' }] }, 1: { weather: { temp: '-5°C', icon: 'fas fa-snowflake', desc: '寒冷/偶雪 Snow' }, itinerary: [{ time: '10:00', title: 'Coex Mall', location: '江南區', note: '寄放頌缽於置物櫃', naverLink: '', who: 'split' }, { time: '19:00', title: '頌缽活動', location: '延禧洞', note: '正式活動，請勿遲到', naverLink: '', who: 'split' }] }, 2: { weather: { temp: '-4°C', icon: 'fas fa-sun', desc: '晴朗 Sunny' }, itinerary: [{ time: '10:00', title: '居家頌缽', location: 'Soon Stay', note: 'Morning Session', naverLink: '', who: 'split' }] }, 3: { weather: { temp: '-2°C', icon: 'fas fa-cloud-sun', desc: '多雲時晴' }, itinerary: [{ time: '10:00', title: '備用：文學館', location: '鍾路區', note: '尹東柱文學館', naverLink: '', who: 'split' }] }, 4: { weather: { temp: '0°C', icon: 'fas fa-plane-departure', desc: '返程 Departure' }, itinerary: [{ time: '14:25', title: '返程飛機', location: 'ICN Airport', note: 'TW 669', naverLink: '', who: 'split' }] } });
-                const backupSpots = reactive([ { name: '望理團路', link: 'https://creatrip.com/zh-TW/blog/7530', img: 'https://i.gyazo.com/6d6eaf8c2dacf96b3da68bdb2eef55ec.jpg', area: '望遠洞' }, { name: '戰爭與女性人權博物館', link: 'https://share.google/MU8rboHnFsGB34OLu', img: 'https://i.gyazo.com/88ed745ff2de070ff582127b743ef34c.jpg', area: '麻浦區' }, { name: 'Literary Museum of Poet Yun Dong-ju', link: 'https://share.google/MF9ILWVC9tpDFoGqO', img: 'https://i.gyazo.com/e0886097fa7bdef2723d13191d11bb5a.jpg', area: '鍾路區' } ]);
-                const mapFacilities = reactive([ { type: '交通樞紐 Transport', icon: 'fas fa-subway', spots: [{ name: '望遠站 (Mangwon Stn)', distance: '步行 5-10分', desc: '地鐵6號線，主要對外樞紐。可直達弘大、合井、梨泰院。', link: '' }, { name: '公車站牌', distance: '步行 3-5分', desc: '多條綠色支線公車前往弘大、延禧洞、新村。', link: '' }, { name: '計程車 (Kakao T)', distance: '隨叫隨到', desc: '建議使用 Kakao T 或 Naver Map 叫車，望遠區車輛多。', link: '' }] }, { type: '生活機能 Life', icon: 'fas fa-shopping-basket', spots: [{ name: '望遠市場', distance: '步行 5-10分', desc: '首爾知名在地市場。必吃：炸雞塊、辣炒年糕、可樂餅。', link: '' }, { name: '便利商店 (GS25/CU)', distance: '步行 1-3分', desc: '隨處可見，可儲值 T-Money 與購買宵夜。', link: '' }, { name: 'Homeplus (合井店)', distance: '地鐵一站', desc: '大型超市，適合採購零食伴手禮 (位於合井站)。', link: '' }, { name: '藥局 (Pharmacy)', distance: '步行 5-10分', desc: '集中於地鐵出口周邊，方便購買常備藥。', link: '' }] }, { type: '休閒娛樂 Leisure', icon: 'fas fa-coffee', spots: [{ name: '望理團路', distance: '步行 5-15分', desc: '充滿設計師咖啡廳、獨立書店與風格小店的文青街區。', link: '' }, { name: '望遠漢江公園', distance: '步行 15-20分', desc: '適合散步、看夕陽、騎腳踏車。', link: '' }, { name: '戰爭與女性人權博物館', distance: '短程計程車', desc: '深度人文景點。', link: '' }] } ]); 
-                const passengerData = { two: { name: 'MS CHEN/YI CHUN (禿 Two)', pnr: 'D5XG3G', seatOut: '28F', baggage: '20KG (15+5)', link: 'https://drive.google.com/file/d/1kdUk2LDfbx4Bh8FDfyJqrWAAPdnSoqVt/view?usp=sharing' }, sia: { name: 'Yu Fan Chen (夏 Sia)', pnr: 'D8A4YY', seatOut: '--', baggage: '15KG', linkOut: 'https://drive.google.com/file/d/1eXuI7Nt0Yp0gv597kgLdks7kLwpxHm0E/view?usp=sharing', linkIn: 'https://drive.google.com/file/d/1zN0nBibImEvdGUV7srER0yWkzqUZmqJu/view?usp=sharing' } };
-                const expenses = reactive([ { item: '機票 & 住宿分攤', amount: 10852.23, who: 'split', date: '預付', isTwd: true, note: '已付款' }, { item: '機場巴士', amount: 18000, who: 'two', date: '12/16', isTwd: false, note: '' } ]);
-                
-                // 你的原始打包清單 (太長了這裡縮減顯示，但功能邏輯會自動處理)
+                // --- 這裡定義最原始的預設資料 ---
+                const defaultItineraryData = { 0: { weather: { temp: '-1°C', icon: 'fas fa-cloud', desc: '多雲 Dry' }, itinerary: [{ time: '17:40', title: '飛往首爾', location: 'RMQ Airport', note: '提早 2.5 小時抵達機場', naverLink: '', who: 'split' }, { time: '22:30', title: '前往民宿', location: 'Soon Stay', note: '機場巴士 6002 -> Holt 站 -> Taxi', naverLink: '', who: 'split' }] }, 1: { weather: { temp: '-5°C', icon: 'fas fa-snowflake', desc: '寒冷/偶雪 Snow' }, itinerary: [{ time: '10:00', title: 'Coex Mall', location: '江南區', note: '寄放頌缽於置物櫃', naverLink: '', who: 'split' }, { time: '19:00', title: '頌缽活動', location: '延禧洞', note: '正式活動，請勿遲到', naverLink: '', who: 'split' }] }, 2: { weather: { temp: '-4°C', icon: 'fas fa-sun', desc: '晴朗 Sunny' }, itinerary: [{ time: '10:00', title: '居家頌缽', location: 'Soon Stay', note: 'Morning Session', naverLink: '', who: 'split' }] }, 3: { weather: { temp: '-2°C', icon: 'fas fa-cloud-sun', desc: '多雲時晴' }, itinerary: [{ time: '10:00', title: '備用：文學館', location: '鍾路區', note: '尹東柱文學館', naverLink: '', who: 'split' }] }, 4: { weather: { temp: '0°C', icon: 'fas fa-plane-departure', desc: '返程 Departure' }, itinerary: [{ time: '14:25', title: '返程飛機', location: 'ICN Airport', note: 'TW 669', naverLink: '', who: 'split' }] } };
+                const defaultBackupSpots = [ { name: '望理團路', link: 'https://creatrip.com/zh-TW/blog/7530', img: 'https://i.gyazo.com/6d6eaf8c2dacf96b3da68bdb2eef55ec.jpg', area: '望遠洞' }, { name: '戰爭與女性人權博物館', link: 'https://share.google/MU8rboHnFsGB34OLu', img: 'https://i.gyazo.com/88ed745ff2de070ff582127b743ef34c.jpg', area: '麻浦區' }, { name: 'Literary Museum of Poet Yun Dong-ju', link: 'https://share.google/MF9ILWVC9tpDFoGqO', img: 'https://i.gyazo.com/e0886097fa7bdef2723d13191d11bb5a.jpg', area: '鍾路區' } ];
+                const defaultMapFacilities = [ { type: '交通樞紐 Transport', icon: 'fas fa-subway', spots: [{ name: '望遠站 (Mangwon Stn)', distance: '步行 5-10分', desc: '地鐵6號線，主要對外樞紐。可直達弘大、合井、梨泰院。', link: '' }, { name: '公車站牌', distance: '步行 3-5分', desc: '多條綠色支線公車前往弘大、延禧洞、新村。', link: '' }, { name: '計程車 (Kakao T)', distance: '隨叫隨到', desc: '建議使用 Kakao T 或 Naver Map 叫車，望遠區車輛多。', link: '' }] }, { type: '生活機能 Life', icon: 'fas fa-shopping-basket', spots: [{ name: '望遠市場', distance: '步行 5-10分', desc: '首爾知名在地市場。必吃：炸雞塊、辣炒年糕、可樂餅。', link: '' }, { name: '便利商店 (GS25/CU)', distance: '步行 1-3分', desc: '隨處可見，可儲值 T-Money 與購買宵夜。', link: '' }, { name: 'Homeplus (合井店)', distance: '地鐵一站', desc: '大型超市，適合採購零食伴手禮 (位於合井站)。', link: '' }, { name: '藥局 (Pharmacy)', distance: '步行 5-10分', desc: '集中於地鐵出口周邊，方便購買常備藥。', link: '' }] }, { type: '休閒娛樂 Leisure', icon: 'fas fa-coffee', spots: [{ name: '望理團路', distance: '步行 5-15分', desc: '充滿設計師咖啡廳、獨立書店與風格小店的文青街區。', link: '' }, { name: '望遠漢江公園', distance: '步行 15-20分', desc: '適合散步、看夕陽、騎腳踏車。', link: '' }, { name: '戰爭與女性人權博物館', distance: '短程計程車', desc: '深度人文景點。', link: '' }] } ];
+                const defaultExpenses = [ { item: '機票 & 住宿分攤', amount: 10852.23, who: 'split', date: '預付', isTwd: true, note: '已付款' }, { item: '機場巴士', amount: 18000, who: 'two', date: '12/16', isTwd: false, note: '' } ];
                 const basePackingList = [ { category: '文件', name: '護照', note: '有效期至少 6 個月', checked: false }, { category: '文件', name: '身份證', note: '備用', checked: false }, { category: '文件', name: '電子登機證', note: '去程 TW670 / 回程 TW669', checked: false }, { category: '文件', name: 'eSIM / 網卡憑證', note: '', checked: false }, { category: '文件', name: '旅遊保險單', note: '', checked: false }, { category: '卡片/錢', name: '信用卡', note: '海外回饋高者佳', checked: false }, { category: '卡片/錢', name: '韓元現金', note: '充值 T-money 用', checked: false }, { category: '卡片/錢', name: 'WOWPASS / Namane', note: '主要消費與交通', checked: false }, { category: '卡片/錢', name: '旅伴 T-money', note: '給旅伴使用', checked: false }, { category: '電子', name: '電源轉接頭', note: '220V 圓形雙孔', checked: false }, { category: '電子', name: '充電器/線', note: '', checked: false }, { category: '電子', name: '行動電源', note: '★ 務必放手提登機行李', checked: false }, { category: '衣著', name: '保暖衣物', note: '洋蔥式穿法，室內有暖氣', checked: false }, { category: '衣著', name: '外套/大衣', note: '防風保暖', checked: false }, { category: '衣著', name: '內衣褲/襪子', note: '足夠天數', checked: false }, { category: '衣著', name: '拖鞋', note: '民宿室內用', checked: false }, { category: '衛生/保養', name: '牙刷/牙膏', note: '★ 環保規定不主動提供', checked: false }, { category: '衛生/保養', name: '洗臉/卸妝', note: '', checked: false }, { category: '衛生/保養', name: '洗護髮/沐浴', note: '分裝瓶', checked: false }, { category: '衛生/保養', name: '化妝包/保養品', note: '加強保濕', checked: false }, { category: '特殊/其他', name: '雨傘', note: '備用', checked: false }, { category: '特殊/其他', name: '個人常備藥', note: '感冒/腸胃/止痛', checked: false }, { category: '特殊/其他', name: '輕便包/袋', note: '參訪奉恩寺用', checked: false }, { category: '特殊/其他', name: '頌缽 & 配件', note: 'Day 2 需寄物，注意保護', checked: false } ];
-                const packingLists = reactive({ two: JSON.parse(JSON.stringify(basePackingList)), sia: JSON.parse(JSON.stringify(basePackingList)) });
-                
+                const defaultPackingLists = { two: JSON.parse(JSON.stringify(basePackingList)), sia: JSON.parse(JSON.stringify(basePackingList)) };
+                const defaultTravelNotes = [ { title: 'T-money 充值 (Day 1)', content: '下飛機後首要任務！WOWPASS/Namane 或旅伴 T-money 皆需在機場便利商店用「韓元現金」充值交通餘額。', icon: 'fas fa-money-bill-wave' }, { title: '機場首選交通', content: '優先搭乘 6002 號機場巴士 (₩18,200)。Holt 站下車轉計程車直達民宿，免去地鐵搬運頌缽之苦。', icon: 'fas fa-bus' }, { title: '末班車風險', content: '航班 21:10 抵達，請留意巴士末班車。若錯過，請立即改搭計程車 (約 ₩45,000~60,000)。', icon: 'fas fa-exclamation-triangle' }, { title: '望遠區內移動', content: '民宿到望遠站可搭「麻浦社區公車」(約10分 ₩1,200) 或步行 5-10 分鐘。', icon: 'fas fa-walking' }, { title: '行李重量規定', content: 'Two (禿): 託運 20kg (已加購) / 手提 10kg。Sia (夏): 託運 15kg / 手提 10kg。', icon: 'fas fa-suitcase' }, { title: '行動電源規定', content: '務必將行動電源放入「手提登機行李」(10kg內)，嚴禁託運！', icon: 'fas fa-battery-full' }, { title: '旅伴卡片使用', content: '旅伴使用 Namane/T-money 時，請僅用「韓元現金」充值交通餘額，避免混淆預付卡餘額。', icon: 'fas fa-credit-card' }, { title: '電壓與插座', content: '韓國電壓為 220V，插座為「兩孔圓形」(豬鼻子)。台灣電器若無變壓功能需自備變壓器，且務必攜帶轉接頭。', icon: 'fas fa-bolt' }, { title: '退稅 (Tax Refund)', content: '在標有 Tax Refund/Tax Free 的店家，單筆消費滿 30,000 韓元可辦理退稅。部分店家提供現場即時退稅 (需出示護照)。', icon: 'fas fa-file-invoice-dollar' }, { title: '環保政策', content: '韓國旅宿業配合政府減塑政策，通常「不提供」免費牙刷、牙膏、刮鬍刀等一次性備品，請務必自備。', icon: 'fas fa-leaf' } ];
+
+                // 使用 Reactive Data，預設值帶入
+                const itineraryData = reactive(JSON.parse(JSON.stringify(defaultItineraryData)));
+                const backupSpots = reactive(JSON.parse(JSON.stringify(defaultBackupSpots)));
+                const mapFacilities = reactive(JSON.parse(JSON.stringify(defaultMapFacilities)));
+                const expenses = reactive(JSON.parse(JSON.stringify(defaultExpenses)));
+                const packingLists = reactive(JSON.parse(JSON.stringify(defaultPackingLists)));
+                const travelNotes = reactive(JSON.parse(JSON.stringify(defaultTravelNotes)));
+
+                const passengerData = { two: { name: 'MS CHEN/YI CHUN (禿 Two)', pnr: 'D5XG3G', seatOut: '28F', baggage: '20KG (15+5)', link: 'https://drive.google.com/file/d/1kdUk2LDfbx4Bh8FDfyJqrWAAPdnSoqVt/view?usp=sharing' }, sia: { name: 'Yu Fan Chen (夏 Sia)', pnr: 'D8A4YY', seatOut: '--', baggage: '15KG', linkOut: 'https://drive.google.com/file/d/1eXuI7Nt0Yp0gv597kgLdks7kLwpxHm0E/view?usp=sharing', linkIn: 'https://drive.google.com/file/d/1zN0nBibImEvdGUV7srER0yWkzqUZmqJu/view?usp=sharing' } };
                 const packingCategories = ['文件', '卡片/錢', '電子', '衣著', '衛生/保養', '特殊/其他'];
                 const emergencyContacts = [ { name: '警察局 (Police)', phone: '112' }, { name: '火警/救護 (Fire/Ambulance)', phone: '119' }, { name: '緊急醫療資訊中心', phone: '1339' }, { name: '韓國旅遊諮詢熱線 (中/英)', phone: '1330' }, { name: '駐韓國台北代表部 (急難救助)', phone: '+82-10-8138-0411' }, { name: '駐韓國台北代表部 (一般)', phone: '+82-2-6329-6000' }, { name: '信用卡掛失 (Visa Global)', phone: '001-800-4481-2500' } ];
-                const travelNotes = reactive([ { title: 'T-money 充值 (Day 1)', content: '下飛機後首要任務！WOWPASS/Namane 或旅伴 T-money 皆需在機場便利商店用「韓元現金」充值交通餘額。', icon: 'fas fa-money-bill-wave' }, { title: '機場首選交通', content: '優先搭乘 6002 號機場巴士 (₩18,200)。Holt 站下車轉計程車直達民宿，免去地鐵搬運頌缽之苦。', icon: 'fas fa-bus' }, { title: '末班車風險', content: '航班 21:10 抵達，請留意巴士末班車。若錯過，請立即改搭計程車 (約 ₩45,000~60,000)。', icon: 'fas fa-exclamation-triangle' }, { title: '望遠區內移動', content: '民宿到望遠站可搭「麻浦社區公車」(約10分 ₩1,200) 或步行 5-10 分鐘。', icon: 'fas fa-walking' }, { title: '行李重量規定', content: 'Two (禿): 託運 20kg (已加購) / 手提 10kg。Sia (夏): 託運 15kg / 手提 10kg。', icon: 'fas fa-suitcase' }, { title: '行動電源規定', content: '務必將行動電源放入「手提登機行李」(10kg內)，嚴禁託運！', icon: 'fas fa-battery-full' }, { title: '旅伴卡片使用', content: '旅伴使用 Namane/T-money 時，請僅用「韓元現金」充值交通餘額，避免混淆預付卡餘額。', icon: 'fas fa-credit-card' }, { title: '電壓與插座', content: '韓國電壓為 220V，插座為「兩孔圓形」(豬鼻子)。台灣電器若無變壓功能需自備變壓器，且務必攜帶轉接頭。', icon: 'fas fa-bolt' }, { title: '退稅 (Tax Refund)', content: '在標有 Tax Refund/Tax Free 的店家，單筆消費滿 30,000 韓元可辦理退稅。部分店家提供現場即時退稅 (需出示護照)。', icon: 'fas fa-file-invoice-dollar' }, { title: '環保政策', content: '韓國旅宿業配合政府減塑政策，通常「不提供」免費牙刷、牙膏、刮鬍刀等一次性備品，請務必自備。', icon: 'fas fa-leaf' } ]);
 
                 // 輸入變數
                 const newExpenseItem = ref(''); const newExpensePrice = ref(''); const newExpenseWho = ref('two'); const newExpenseDate = ref(''); const newExpenseCurrency = ref('KRW'); const newExpenseNote = ref('');
@@ -352,7 +353,6 @@
                     }, (error) => {
                         console.error("Firebase Error:", error);
                         syncStatus.value = 'error';
-                        // 出錯時至少有本地的預設資料可用，把遮罩關掉
                         document.getElementById('loading-screen').style.display = 'none';
                     });
                 });
@@ -372,7 +372,28 @@
                     }
                 };
 
-                // 3. 監聽所有變動並自動儲存
+                // 3. 強制重置功能 (Rescue Button)
+                const forceResetToDefault = async () => {
+                    if(!confirm("確定要強制覆蓋雲端資料嗎？這會把目前的資料重置回最原始的設定。")) return;
+                    syncStatus.value = 'saving';
+                    try {
+                        // 將所有 Reactive Data 重置回預設值
+                        Object.assign(itineraryData, JSON.parse(JSON.stringify(defaultItineraryData)));
+                        expenses.length = 0; expenses.push(...JSON.parse(JSON.stringify(defaultExpenses)));
+                        Object.assign(packingLists, JSON.parse(JSON.stringify(defaultPackingLists)));
+                        travelNotes.length = 0; travelNotes.push(...JSON.parse(JSON.stringify(defaultTravelNotes)));
+                        backupSpots.length = 0; backupSpots.push(...JSON.parse(JSON.stringify(defaultBackupSpots)));
+                        mapFacilities.length = 0; mapFacilities.push(...JSON.parse(JSON.stringify(defaultMapFacilities)));
+                        
+                        // 寫入雲端
+                        await saveToCloud();
+                        alert("重置成功！資料已恢復。");
+                    } catch (e) {
+                        alert("重置失敗：" + e.message);
+                    }
+                };
+
+                // 4. 監聽所有變動並自動儲存
                 watch([itineraryData, expenses, packingLists, travelNotes, backupSpots, mapFacilities], () => {
                     saveToCloud();
                 }, { deep: true });
@@ -416,7 +437,7 @@
                     showModal, modalMode, openAddModal, newItem, saveNewItem, deleteItem, openMapModal, newMapItem, saveMapSpot, deleteMapSpot, editMapSpot, editingMapItem,
                     backupSpots, openBackupModal, newBackupItem, saveBackupItem, deleteBackupSpot, openNoteModal, newNote, saveNote, deleteNote,
                     copyAddress, formatNumber, emergencyContacts, travelNotes, mapFacilities, openEditItemModal, editingItemIndex, saveExpense, editExpense, editingExpenseIndex, cancelEditExpense, newExpenseCurrency, newExpenseNote,
-                    syncStatus
+                    syncStatus, forceResetToDefault
                 };
             }
         }).mount('#app');
